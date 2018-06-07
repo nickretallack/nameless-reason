@@ -49,9 +49,9 @@ let make =
     let roundness = 8;
     let actualRoundness = roundness * 2 < height ? roundness : height / 2;
 
-    let sourceIsHigher = sourcePosition.y > sinkPosition.y
+    let sourceIsHigher = sourcePosition.y > sinkPosition.y;
     let (leftStyle, rightStyle) =
-      if (sourcePosition.x < sinkPosition.x ? sourceIsHigher : !sourceIsHigher) {
+      if (sourcePosition.x < sinkPosition.x ? sourceIsHigher : ! sourceIsHigher) {
         (
           ReactDOMRe.Style.combine(
             sharedStyle,
