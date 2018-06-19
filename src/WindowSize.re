@@ -9,11 +9,9 @@ let component = ReasonReact.reducerComponent("WindowSize");
 external addEventListener : (string, Js.t({..}) => unit) => unit =
   "window.addEventListener";
 
-[@bs.val]
-external innerWidth : int = "window.innerWidth";
+[@bs.val] external innerWidth : int = "window.innerWidth";
 
-[@bs.val]
-external innerHeight : int = "window.innerHeight";
+[@bs.val] external innerHeight : int = "window.innerHeight";
 
 let make = (~render, _children) => {
   ...component,
