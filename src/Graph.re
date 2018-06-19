@@ -15,46 +15,43 @@ let make = (~definition, ~definitions, _children) => {
     let inputs = NibMap.bindings(documentation.inputNames);
     let outputs = NibMap.bindings(documentation.outputNames);
     let nodes = NodeMap.bindings(definition.implementation.nodes);
+
+    let renderList = list => ReasonReact.array(Array.of_list(list));
+
     <div>
       (ReasonReact.string(documentation.name))
       (
-        ReasonReact.array(
-          Array.of_list(
-            List.map(
-              ((nib_id, name)) =>
-                <div key=nib_id> (ReasonReact.string(name)) </div>,
-              inputs,
-            ),
+        renderList(
+          List.map(
+            ((nib_id, name)) =>
+              <div key=nib_id> (ReasonReact.string(name)) </div>,
+            inputs,
           ),
         )
       )
       (
-        ReasonReact.array(
-          Array.of_list(
-            List.map(
-              ((nib_id, name)) =>
-                <div key=nib_id> (ReasonReact.string(name)) </div>,
-              outputs,
-            ),
+        renderList(
+          List.map(
+            ((nib_id, name)) =>
+              <div key=nib_id> (ReasonReact.string(name)) </div>,
+            outputs,
           ),
         )
       )
       (
-        ReasonReact.array(
-          Array.of_list(
-            List.map(
-              ((node_id, node)) => {
-                let definition =
-                  switch (getNodeDefinition(node)) {
-                  | Graph(graph_definition) => graph_definition
-                  };
-                let documentation = getDocumentation(definition);
-                <div key=node_id>
-                  (ReasonReact.string(documentation.name))
-                </div>;
-              },
-              nodes,
-            ),
+        renderList(
+          List.map(
+            ((node_id, node)) => {
+              let definition =
+                switch (getNodeDefinition(node)) {
+                | Graph(graph_definition) => graph_definition
+                };
+              let documentation = getDocumentation(definition);
+              <div key=node_id>
+                (ReasonReact.string(documentation.name))
+              </div>;
+            },
+            nodes,
           ),
         )
       )
