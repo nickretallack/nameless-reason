@@ -1,17 +1,19 @@
-open Types;
 open Utils;
+open Types;
 
-let component = ReasonReact.statelessComponent("Graph");
+let component = ReasonReact.statelessComponent("Node");
 
-let make = (~definition, ~definitions, _children) => {
+let make = (~definition, _children) => {
   ...component,
   render: _self => {
-    let getDefinition = definition_id =>
-      DefinitionMap.find(definition_id, definitions);
+    let definition =
+      switch (definition) {
+      | Graph(graph_definition) => graph_definition
+      };
+
     let documentation = getDocumentation(definition);
     let inputs = NibMap.bindings(documentation.inputNames);
     let outputs = NibMap.bindings(documentation.outputNames);
-    let nodes = NodeMap.bindings(definition.implementation.nodes);
 
     <div>
       (ReasonReact.string(documentation.name))
@@ -27,16 +29,6 @@ let make = (~definition, ~definitions, _children) => {
           ((nib_id, name)) =>
             <div key=nib_id> (ReasonReact.string(name)) </div>,
           outputs,
-        )
-      )
-      (
-        renderMap(
-          ((node_id, node)) =>
-            <Node
-              key=node_id
-              definition=(getDefinition(node.definition_id))
-            />,
-          nodes,
         )
       )
     </div>;
