@@ -3,29 +3,28 @@ type node_id = string;
 type definition_id = string;
 type language_tag = string;
 
-module NibMap =
-  Map.Make({
+module NibComparator =
+  Belt.Id.MakeComparable({
     type t = nib_id;
-    let compare = compare;
+    let cmp = compare;
   });
+type nib_map('a) = Belt.Map.t(NibComparator.t, 'a, NibComparator.identity);
 
-module NodeMap =
-  Map.Make({
+module NodeComparator =
+  Belt.Id.MakeComparable({
     type t = node_id;
-    let compare = compare;
+    let cmp = compare;
   });
+type node_map('a) =
+  Belt.Map.t(NodeComparator.t, 'a, NodeComparator.identity);
 
-module DefinitionMap =
-  Map.Make({
-    type t = definition_id;
-    let compare = compare;
-  });
-
-module LanguageMap =
-  Map.Make({
+module LanguageComparator =
+  Belt.Id.MakeComparable({
     type t = language_tag;
-    let compare = compare;
+    let cmp = compare;
   });
+type language_map('a) =
+  Belt.Map.t(LanguageComparator.t, 'a, LanguageComparator.identity);
 
 type point = {
   x: int,
@@ -52,26 +51,28 @@ type node_implementation = {
   node_type,
 };
 
-module ConnectionMap =
-  Map.Make({
+module ConnectionComparator =
+  Belt.Id.MakeComparable({
     type t = nib_connection;
-    let compare = compare;
+    let cmp = compare;
   });
+type connection_map =
+  Belt.Map.t(nib_connection, nib_connection, ConnectionComparator.identity);
 
 type graph_implementation = {
-  connections: ConnectionMap.t(nib_connection),
-  nodes: NodeMap.t(node_implementation),
+  connections: connection_map,
+  nodes: node_map(node_implementation),
 };
 
 type function_documentation = {
   name: string,
   description: string,
-  inputNames: NibMap.t(string),
-  outputNames: NibMap.t(string),
+  inputNames: nib_map(string),
+  outputNames: nib_map(string),
 };
 
 type graph_definition = {
-  documentation: LanguageMap.t(function_documentation),
+  documentation: language_map(function_documentation),
   implementation: graph_implementation,
 };
 
@@ -79,4 +80,10 @@ type graph_definition = {
 type definition =
   | Graph(graph_definition);
 
-type definition_map = DefinitionMap.t(definition);
+module DefinitionComparator =
+  Belt.Id.MakeComparable({
+    type t = definition_id;
+    let cmp = compare;
+  });
+type definition_map =
+  Belt.Map.t(definition_id, definition, DefinitionComparator.identity);

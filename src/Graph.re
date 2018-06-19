@@ -7,14 +7,12 @@ let make = (~definition, ~definitions, ~size, _children) => {
   ...component,
   render: _self => {
     let getDefinition = definition_id =>
-      DefinitionMap.find(definition_id, definitions);
+      Belt.Map.getExn(definitions, definition_id);
     let documentation = getDocumentation(definition);
-    let inputs = NibMap.bindings(documentation.inputNames);
-    let outputs = NibMap.bindings(documentation.outputNames);
-    let nodes = NodeMap.bindings(definition.implementation.nodes);
-
+    let inputs = Belt.Map.toArray(documentation.inputNames);
+    let outputs = Belt.Map.toArray(documentation.outputNames);
+    let nodes = Belt.Map.toArray(definition.implementation.nodes);
     <div>
-      (ReasonReact.string(string_of_int(size.x)))
       (ReasonReact.string(documentation.name))
       (
         renderMap(

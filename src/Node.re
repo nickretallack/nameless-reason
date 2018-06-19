@@ -12,8 +12,8 @@ let make = (~definition, _children) => {
       };
 
     let documentation = getDocumentation(definition);
-    let inputs = NibMap.bindings(documentation.inputNames);
-    let outputs = NibMap.bindings(documentation.outputNames);
+    let inputs = Belt.Map.toArray(documentation.inputNames);
+    let outputs = Belt.Map.toArray(documentation.outputNames);
 
     <div className="node">
       (ReasonReact.string(documentation.name))
