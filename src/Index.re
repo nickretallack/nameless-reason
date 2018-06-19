@@ -38,6 +38,8 @@ let definition = Graph(graph_definition);
 let definitions = DefinitionMap.(empty |> add("example", definition));
 
 ReactDOMRe.renderToElementWithId(
-  <Graph definition=graph_definition definitions />,
+  <WindowSize
+    render=(size => <Graph definition=graph_definition definitions size />)
+  />,
   "graph",
 );

@@ -3,7 +3,7 @@ open Utils;
 
 let component = ReasonReact.statelessComponent("Graph");
 
-let make = (~definition, ~definitions, _children) => {
+let make = (~definition, ~definitions, ~size, _children) => {
   ...component,
   render: _self => {
     let getDefinition = definition_id =>
@@ -14,6 +14,7 @@ let make = (~definition, ~definitions, _children) => {
     let nodes = NodeMap.bindings(definition.implementation.nodes);
 
     <div>
+      (ReasonReact.string(string_of_int(size.x)))
       (ReasonReact.string(documentation.name))
       (
         renderMap(
