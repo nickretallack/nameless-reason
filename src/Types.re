@@ -9,10 +9,16 @@ type point = {
   y: int,
 };
 
-type nib_connection = {
+type node_connection = {
   node_id: string,
   nib_id: string,
 };
+
+type graph_connection = {nib_id: string};
+
+type nib_connection =
+  | NodeConnection(node_connection)
+  | GraphConnection(graph_connection);
 
 type node_type =
   | Call
@@ -36,11 +42,15 @@ type graph_implementation = {
 
 type function_documentation = {
   name: string,
+  description: string,
   inputNames: StringMap.t(string),
   outputNames: StringMap.t(string),
 };
 
-type graph_definition = {documentation: StringMap.t(function_documentation)};
+type graph_definition = {
+  documentation: StringMap.t(function_documentation),
+  implementation: graph_implementation,
+};
 
 /* TODO: more types of definitions */
 type definition =
