@@ -35,7 +35,7 @@ let graph_definition = {
 };
 
 let definition = Graph(graph_definition);
-let definitions = LanguageMap.(empty |> add("example", definition));
+let definitions = DefinitionMap.(empty |> add("example", definition));
 
 ReactDOMRe.renderToElementWithId(
   <Graph definition=graph_definition definitions />,
