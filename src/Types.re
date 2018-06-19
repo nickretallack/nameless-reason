@@ -1,6 +1,29 @@
-module StringMap =
+type nib_id = string;
+type node_id = string;
+type definition_id = string;
+type language_tag = string;
+
+module NibMap =
   Map.Make({
-    type t = string;
+    type t = nib_id;
+    let compare = compare;
+  });
+
+module NodeMap =
+  Map.Make({
+    type t = node_id;
+    let compare = compare;
+  });
+
+module DefinitionMap =
+  Map.Make({
+    type t = definition_id;
+    let compare = compare;
+  });
+
+module LanguageMap =
+  Map.Make({
+    type t = language_tag;
     let compare = compare;
   });
 
@@ -10,11 +33,11 @@ type point = {
 };
 
 type node_connection = {
-  node_id: string,
-  nib_id: string,
+  node_id,
+  nib_id,
 };
 
-type graph_connection = {nib_id: string};
+type graph_connection = {nib_id};
 
 type nib_connection =
   | NodeConnection(node_connection)
@@ -25,7 +48,7 @@ type node_type =
   | Value;
 
 type node_implementation = {
-  definition_id: string,
+  definition_id,
   node_type,
 };
 
@@ -37,18 +60,18 @@ module ConnectionMap =
 
 type graph_implementation = {
   connections: ConnectionMap.t(nib_connection),
-  nodes: StringMap.t(node_implementation),
+  nodes: NodeMap.t(node_implementation),
 };
 
 type function_documentation = {
   name: string,
   description: string,
-  inputNames: StringMap.t(string),
-  outputNames: StringMap.t(string),
+  inputNames: NibMap.t(string),
+  outputNames: NibMap.t(string),
 };
 
 type graph_definition = {
-  documentation: StringMap.t(function_documentation),
+  documentation: LanguageMap.t(function_documentation),
   implementation: graph_implementation,
 };
 
@@ -56,4 +79,4 @@ type graph_definition = {
 type definition =
   | Graph(graph_definition);
 
-type definition_map = StringMap.t(definition);
+type definition_map = DefinitionMap.t(definition);
