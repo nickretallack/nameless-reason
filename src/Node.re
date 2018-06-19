@@ -15,19 +15,25 @@ let make = (~definition, _children) => {
     let inputs = NibMap.bindings(documentation.inputNames);
     let outputs = NibMap.bindings(documentation.outputNames);
 
-    <div>
+    <div className="node">
       (ReasonReact.string(documentation.name))
       (
         renderMap(
           ((nib_id, name)) =>
-            <div key=nib_id> (ReasonReact.string(name)) </div>,
+            <div className="input" key=nib_id>
+              (ReasonReact.string(name))
+              <div className="sink nib" />
+            </div>,
           inputs,
         )
       )
       (
         renderMap(
           ((nib_id, name)) =>
-            <div key=nib_id> (ReasonReact.string(name)) </div>,
+            <div className="output" key=nib_id>
+              <div className="source nib" />
+              (ReasonReact.string(name))
+            </div>,
           outputs,
         )
       )

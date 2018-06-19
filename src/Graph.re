@@ -18,14 +18,20 @@ let make = (~definition, ~definitions, _children) => {
       (
         renderMap(
           ((nib_id, name)) =>
-            <div key=nib_id> (ReasonReact.string(name)) </div>,
+            <div className="graph input" key=nib_id>
+              (ReasonReact.string(name))
+              <div className="source nib" />
+            </div>,
           inputs,
         )
       )
       (
         renderMap(
           ((nib_id, name)) =>
-            <div key=nib_id> (ReasonReact.string(name)) </div>,
+            <div className="graph output" key=nib_id>
+              <div className="sink nib" />
+              (ReasonReact.string(name))
+            </div>,
           outputs,
         )
       )
