@@ -1,6 +1,6 @@
-let component = ReasonReact.statelessComponent("Connection");
+open Utils;
 
-let pixels = x => string_of_int(x) ++ "px";
+let component = ReasonReact.statelessComponent("Connection");
 
 let make =
     (
