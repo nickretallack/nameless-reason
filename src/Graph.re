@@ -53,6 +53,21 @@ let make = (~definition, ~definitions, ~size, _children) => {
       );
     let columnWidth = size.x / List.length(columns);
 
+    let mapUnion = (map1, map2) => Belt.Map.reduce(map1, map2, Belt.Map.set);
+    let mapMultimerge = (acc, maps) => List.fold_left(mapUnion, acc, maps);
+
+    let nodePositions =
+      mapMultimerge(
+        Belt.Map.make(~id=(module NodeComparator)),
+        List.mapi(
+          (index, column) =>
+            Belt.Map.map(column, _node =>
+              {x: columnWidth / 2 + columnWidth * index, y: size.y / 2}
+            ),
+          columns,
+        ),
+      );
+
     <div>
       (ReasonReact.string(documentation.name))
       (
@@ -76,21 +91,14 @@ let make = (~definition, ~definitions, ~size, _children) => {
         )
       )
       (
-        renderList(
-          (index, column) =>
-            renderMap(
-              ((node_id, node)) =>
-                <Node
-                  key=node_id
-                  definition=(getDefinition(node.definition_id))
-                  position={
-                    x: columnWidth / 2 + columnWidth * index,
-                    y: size.y / 2,
-                  }
-                />,
-              column,
-            ),
-          columns,
+        renderMap(
+          ((node_id, node)) =>
+            <Node
+              key=node_id
+              definition=(getDefinition(node.definition_id))
+              position=(Belt.Map.getExn(nodePositions, node_id))
+            />,
+          definition.implementation.nodes,
         )
       )
     </div>;
