@@ -51,7 +51,6 @@ let make = (~definition, ~definitions, ~size, _children) => {
         definition.implementation.nodes,
         definition.implementation.connections,
       );
-    Js.log(columns);
 
     <div>
       (ReasonReact.string(documentation.name))
@@ -76,13 +75,23 @@ let make = (~definition, ~definitions, ~size, _children) => {
         )
       )
       (
-        renderMap(
-          ((node_id, node)) =>
-            <Node
-              key=node_id
-              definition=(getDefinition(node.definition_id))
-            />,
-          definition.implementation.nodes,
+        renderList(
+          List.mapi(
+            (index, column) =>
+              <div key=(string_of_int(index)) className="column">
+                (
+                  renderMap(
+                    ((node_id, node)) =>
+                      <Node
+                        key=node_id
+                        definition=(getDefinition(node.definition_id))
+                      />,
+                    column,
+                  )
+                )
+              </div>,
+            columns,
+          ),
         )
       )
     </div>;
