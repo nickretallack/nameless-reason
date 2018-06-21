@@ -71,21 +71,28 @@ let make = (~definition, ~definitions, ~size, _children) => {
       )
       * textHeight;
     };
-
     let nodePositions =
-      mapMultimerge(
+      Belt.Map.mergeMany(
         Belt.Map.make(~id=(module NodeComparator)),
-        List.mapi(
-          (index, column) => {
-            let rowHeight = size.y / Belt.Map.size(column);
-            Belt.Map.map(column, node =>
-              {
-                x: columnWidth / 2 + columnWidth * index - nodeWidth / 2,
-                y: size.y / 2 - nodeHeight(node) / 2,
-              }
-            );
-          },
-          columns,
+        Array.of_list(
+          List.flatten(
+            List.mapi(
+              (column, nodes) => {
+                let rowHeight = size.y / Belt.Map.size(nodes);
+                List.mapi(
+                  (row, (node_id, node)) => (
+                    node_id,
+                    {
+                      x: columnWidth / 2 + columnWidth * column - nodeWidth / 2,
+                      y: rowHeight /2 + rowHeight * row - nodeHeight(node) / 2,
+                    },
+                  ),
+                  Belt.Map.toList(nodes),
+                );
+              },
+              columns,
+            ),
+          ),
         ),
       );
 

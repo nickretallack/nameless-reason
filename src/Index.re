@@ -21,6 +21,7 @@ let example_implementation = {
       [|
         ("node1", {definition_id: "example", node_type: Call}),
         ("node2", {definition_id: "example", node_type: Call}),
+        ("node3", {definition_id: "example", node_type: Call}),
       |],
       ~id=(module NodeComparator),
     ),
