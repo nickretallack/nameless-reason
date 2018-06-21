@@ -22,7 +22,7 @@ let make = (~definition, ~position, _children) => {
           (),
         )
       )>
-      (ReasonReact.string(documentation.name))
+      <div className="name"> (ReasonReact.string(documentation.name)) </div>
       (
         renderMap(
           ((nib_id, name)) =>

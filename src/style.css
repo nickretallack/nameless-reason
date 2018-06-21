@@ -15,6 +15,9 @@ body {
 .node .name {
   text-align: center;
   height: 20px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 :root {
