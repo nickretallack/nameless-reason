@@ -58,35 +58,31 @@ let make = (~definition, ~definitions, ~size, _children) => {
     let mapUnion = (map1, map2) => Belt.Map.reduce(map1, map2, Belt.Map.set);
     let mapMultimerge = (acc, maps) => List.fold_left(mapUnion, acc, maps);
 
+    let nodeHeight = node => {
+      let definition =
+        switch (getDefinition(node.definition_id)) {
+        | Graph(definition) => definition
+        };
+      let documentation = getDocumentation(definition);
+      (
+        Belt.Map.size(documentation.inputNames)
+        + Belt.Map.size(documentation.outputNames)
+        + 3
+      )
+      * textHeight;
+    };
+
     let nodePositions =
       mapMultimerge(
         Belt.Map.make(~id=(module NodeComparator)),
         List.mapi(
           (index, column) => {
             let rowHeight = size.y / Belt.Map.size(column);
-            Belt.Map.map(
-              column,
-              node => {
-                let definition =
-                  switch (getDefinition(node.definition_id)) {
-                  | Graph(definition) => definition
-                  };
-
-                let documentation = getDocumentation(definition);
-                {
-                  x: columnWidth / 2 + columnWidth * index - nodeWidth / 2,
-                  y:
-                    size.y
-                    / 2
-                    - (
-                      Belt.Map.size(documentation.inputNames)
-                      + Belt.Map.size(documentation.outputNames)
-                      + 3
-                    )
-                    * textHeight
-                    / 2,
-                };
-              },
+            Belt.Map.map(column, node =>
+              {
+                x: columnWidth / 2 + columnWidth * index - nodeWidth / 2,
+                y: size.y / 2 - nodeHeight(node) / 2,
+              }
             );
           },
           columns,
