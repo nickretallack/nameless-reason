@@ -64,7 +64,7 @@ let make = (~definition, ~definitions, ~size, _children) => {
       (
         Belt.Map.size(documentation.inputNames)
         + Belt.Map.size(documentation.outputNames)
-        + 3
+        + 1
       )
       * textHeight;
     };
