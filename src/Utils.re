@@ -1,5 +1,7 @@
 open Types;
 
+let pixels = x => string_of_int(x) ++ "px";
+
 let renderMap = (fn, map) =>
   ReasonReact.array(Array.map(fn, Belt.Map.toArray(map)));
 let renderList = list => ReasonReact.array(Array.of_list(list));

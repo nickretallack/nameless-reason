@@ -51,6 +51,7 @@ let make = (~definition, ~definitions, ~size, _children) => {
         definition.implementation.nodes,
         definition.implementation.connections,
       );
+    let columnWidth = size.x / List.length(columns);
 
     <div>
       (ReasonReact.string(documentation.name))
@@ -85,6 +86,10 @@ let make = (~definition, ~definitions, ~size, _children) => {
                       <Node
                         key=node_id
                         definition=(getDefinition(node.definition_id))
+                        position={
+                          x: columnWidth / 2 + columnWidth * index,
+                          y: size.y / 2,
+                        }
                       />,
                     column,
                   )

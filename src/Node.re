@@ -3,7 +3,7 @@ open Types;
 
 let component = ReasonReact.statelessComponent("Node");
 
-let make = (~definition, _children) => {
+let make = (~definition, ~position, _children) => {
   ...component,
   render: _self => {
     let definition =
@@ -13,7 +13,15 @@ let make = (~definition, _children) => {
 
     let documentation = getDocumentation(definition);
 
-    <div className="node">
+    <div
+      className="node"
+      style=(
+        ReactDOMRe.Style.make(
+          ~left=pixels(position.x),
+          ~top=pixels(position.y),
+          (),
+        )
+      )>
       (ReasonReact.string(documentation.name))
       (
         renderMap(
