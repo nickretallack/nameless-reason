@@ -30,7 +30,6 @@ let make =
         ~position="absolute",
         (),
       );
-    Js.log(pixels(width));
 
     let sharedStyle =
       ReactDOMRe.Style.make(
