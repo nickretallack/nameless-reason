@@ -12,8 +12,6 @@ let make = (~definition, _children) => {
       };
 
     let documentation = getDocumentation(definition);
-    let inputs = Belt.Map.toArray(documentation.inputNames);
-    let outputs = Belt.Map.toArray(documentation.outputNames);
 
     <div className="node">
       (ReasonReact.string(documentation.name))
@@ -24,7 +22,7 @@ let make = (~definition, _children) => {
               (ReasonReact.string(name))
               <div className="sink nib" />
             </div>,
-          inputs,
+          documentation.inputNames,
         )
       )
       (
@@ -34,7 +32,7 @@ let make = (~definition, _children) => {
               <div className="source nib" />
               (ReasonReact.string(name))
             </div>,
-          outputs,
+          documentation.outputNames,
         )
       )
     </div>;

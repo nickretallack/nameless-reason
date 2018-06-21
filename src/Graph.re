@@ -45,9 +45,6 @@ let make = (~definition, ~definitions, ~size, _children) => {
     let getDefinition = definition_id =>
       Belt.Map.getExn(definitions, definition_id);
     let documentation = getDocumentation(definition);
-    let inputs = Belt.Map.toArray(documentation.inputNames);
-    let outputs = Belt.Map.toArray(documentation.outputNames);
-    let nodes = Belt.Map.toArray(definition.implementation.nodes);
     let columns =
       topoSort(
         definition.implementation.nodes,
@@ -64,7 +61,7 @@ let make = (~definition, ~definitions, ~size, _children) => {
               (ReasonReact.string(name))
               <div className="source nib" />
             </div>,
-          inputs,
+          documentation.inputNames,
         )
       )
       (
@@ -74,7 +71,7 @@ let make = (~definition, ~definitions, ~size, _children) => {
               <div className="sink nib" />
               (ReasonReact.string(name))
             </div>,
-          outputs,
+          documentation.outputNames,
         )
       )
       (
@@ -84,7 +81,7 @@ let make = (~definition, ~definitions, ~size, _children) => {
               key=node_id
               definition=(getDefinition(node.definition_id))
             />,
-          nodes,
+          definition.implementation.nodes,
         )
       )
     </div>;
