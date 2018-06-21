@@ -51,12 +51,9 @@ let make = (~definition, ~definitions, ~size, _children) => {
         definition.implementation.nodes,
         definition.implementation.connections,
       );
-    let columnWidth = size.x / List.length(columns);
+    let columnWidth = size.x / (List.length(columns) + 1);
     let nodeWidth = 80;
     let textHeight = 20;
-
-    let mapUnion = (map1, map2) => Belt.Map.reduce(map1, map2, Belt.Map.set);
-    let mapMultimerge = (acc, maps) => List.fold_left(mapUnion, acc, maps);
 
     let nodeHeight = node => {
       let definition =
@@ -78,13 +75,13 @@ let make = (~definition, ~definitions, ~size, _children) => {
           List.flatten(
             List.mapi(
               (column, nodes) => {
-                let rowHeight = size.y / Belt.Map.size(nodes);
+                let rowHeight = size.y / (Belt.Map.size(nodes) + 1);
                 List.mapi(
                   (row, (node_id, node)) => (
                     node_id,
                     {
-                      x: columnWidth / 2 + columnWidth * column - nodeWidth / 2,
-                      y: rowHeight /2 + rowHeight * row - nodeHeight(node) / 2,
+                      x: columnWidth * (column + 1) - nodeWidth / 2,
+                      y: rowHeight * (row + 1) - nodeHeight(node) / 2,
                     },
                   ),
                   Belt.Map.toList(nodes),
