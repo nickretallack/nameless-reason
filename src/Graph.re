@@ -77,26 +77,20 @@ let make = (~definition, ~definitions, ~size, _children) => {
       )
       (
         renderList(
-          List.mapi(
-            (index, column) =>
-              <div key=(string_of_int(index)) className="column">
-                (
-                  renderMap(
-                    ((node_id, node)) =>
-                      <Node
-                        key=node_id
-                        definition=(getDefinition(node.definition_id))
-                        position={
-                          x: columnWidth / 2 + columnWidth * index,
-                          y: size.y / 2,
-                        }
-                      />,
-                    column,
-                  )
-                )
-              </div>,
-            columns,
-          ),
+          (index, column) =>
+            renderMap(
+              ((node_id, node)) =>
+                <Node
+                  key=node_id
+                  definition=(getDefinition(node.definition_id))
+                  position={
+                    x: columnWidth / 2 + columnWidth * index,
+                    y: size.y / 2,
+                  }
+                />,
+              column,
+            ),
+          columns,
         )
       )
     </div>;
