@@ -27,9 +27,10 @@ let rec topoSort = (nodes, connections) => {
       switch (sink) {
       | GraphConnection(_connection) => false
       | NodeConnection(connection) =>
-        Belt.Map.some(availableNodes, (node_id, _node) =>
-          connection.node_id == node_id
-        )
+        !
+          Belt.Map.some(availableNodes, (node_id, _node) =>
+            connection.node_id == node_id
+          )
       }
     );
   if (Belt.Map.isEmpty(unavailableNodes)) {
