@@ -20,9 +20,11 @@ let make = (~render, _children) => {
     switch (action) {
     | Resize(size) => ReasonReact.Update(size)
     },
-  didMount: self =>
+  didMount: self => {
+    self.send(Resize({x: innerWidth, y: innerHeight}));
     addEventListener("resize", _event =>
       self.send(Resize({x: innerWidth, y: innerHeight}))
-    ),
+    );
+  },
   render: self => render(self.state),
 };
