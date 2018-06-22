@@ -13,15 +13,7 @@ let make = (~definition, ~position, _children) => {
 
     let documentation = getDocumentation(definition);
 
-    <div
-      className="node"
-      style=(
-        ReactDOMRe.Style.make(
-          ~left=pixels(position.x),
-          ~top=pixels(position.y),
-          (),
-        )
-      )>
+    <div className="node" style=(positionStyle(position))>
       <div className="name"> (ReasonReact.string(documentation.name)) </div>
       (
         renderMap(

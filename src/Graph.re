@@ -59,6 +59,33 @@ let make = (~definition, ~definitions, ~size, _children) => {
       );
     let getNodePosition = node_id => Belt.Map.getExn(nodePositions, node_id);
 
+    let nibOffset = 10;
+    let nibPositions = (nibIds, isInput) => {
+      let rowHeight = size.y / (List.length(nibIds) + 1);
+      Belt.Map.fromArray(
+        Array.of_list(
+          List.mapi(
+            (index, nib_id) => (
+              nib_id,
+              {
+                x:
+                  if (isInput) {
+                    size.x - nibOffset;
+                  } else {
+                    nibOffset;
+                  },
+                y: (index + 1) * rowHeight,
+              },
+            ),
+            nibIds,
+          ),
+        ),
+        ~id=(module NibComparator),
+      );
+    };
+    let inputPositions = nibPositions(definition.display.inputOrder, true);
+    let outputPositions = nibPositions(definition.display.outputOrder, false);
+
     let getNibPosition = (nib_connection, isSink) =>
       switch (nib_connection) {
       | NodeConnection({node_id, nib_id}) =>
@@ -87,15 +114,11 @@ let make = (~definition, ~definitions, ~size, _children) => {
             / 2
             + nodePosition.y,
         };
-      | GraphConnection(_) => {
-          x:
-            if (isSink) {
-              0;
-            } else {
-              size.x;
-            },
-          y: size.y / 2,
-        }
+      | GraphConnection({nib_id}) =>
+        Belt.Map.getExn(
+          if (isSink) {outputPositions} else {inputPositions},
+          nib_id,
+        )
       };
 
     let getNibNudge = sink =>
@@ -133,7 +156,16 @@ let make = (~definition, ~definitions, ~size, _children) => {
       (
         renderMap(
           ((nib_id, name)) =>
-            <div className="graph input" key=nib_id>
+            <div
+              className="graph input"
+              key=nib_id
+              style=(
+                ReactDOMRe.Style.make(
+                  ~right=pixels(10),
+                  ~top=pixels(Belt.Map.getExn(inputPositions, nib_id).y),
+                  (),
+                )
+              )>
               (ReasonReact.string(name))
               <div className="source nib" />
             </div>,
@@ -143,7 +175,10 @@ let make = (~definition, ~definitions, ~size, _children) => {
       (
         renderMap(
           ((nib_id, name)) =>
-            <div className="graph output" key=nib_id>
+            <div
+              className="graph output"
+              key=nib_id
+              style=(positionStyle(Belt.Map.getExn(outputPositions, nib_id)))>
               <div className="sink nib" />
               (ReasonReact.string(name))
             </div>,
