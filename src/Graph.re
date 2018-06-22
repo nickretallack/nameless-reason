@@ -72,14 +72,12 @@ let make = (~definition, ~definitions, ~size, _children) => {
               (
                 switch (definition) {
                 | Graph({display}) =>
-                  Js.log(display.outputOrder);
-                  Js.log(display.inputOrder);
                   if (isSink) {
                     indexOf(nib_id, display.inputOrder);
                   } else {
                     indexOf(nib_id, display.outputOrder)
                     + List.length(display.inputOrder);
-                  };
+                  }
                 }
               )
               + 1
@@ -90,6 +88,18 @@ let make = (~definition, ~definitions, ~size, _children) => {
             + nodePosition.y,
         };
       | GraphConnection(_) => {x: 0, y: size.y / 2}
+      };
+
+    let getNibNudge = sink =>
+      switch (sink) {
+      | NodeConnection({node_id, nib_id}) =>
+        let node = getNode(node_id);
+        let definition = getDefinition(node.definition_id);
+        switch (definition) {
+        | Graph({display}) => indexOf(nib_id, display.inputOrder)
+        };
+      | GraphConnection({nib_id}) =>
+        indexOf(nib_id, definition.display.outputOrder)
       };
 
     let getConnectionKey = sink =>
@@ -107,6 +117,7 @@ let make = (~definition, ~definitions, ~size, _children) => {
               key=(getConnectionKey(sink))
               sinkPosition=(getNibPosition(sink, true))
               sourcePosition=(getNibPosition(source, false))
+              nudge=(getNibNudge(sink))
             />,
           definition.implementation.connections,
         )
