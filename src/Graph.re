@@ -87,7 +87,15 @@ let make = (~definition, ~definitions, ~size, _children) => {
             / 2
             + nodePosition.y,
         };
-      | GraphConnection(_) => {x: 0, y: size.y / 2}
+      | GraphConnection(_) => {
+          x:
+            if (isSink) {
+              0;
+            } else {
+              size.x;
+            },
+          y: size.y / 2,
+        }
       };
 
     let getNibNudge = sink =>

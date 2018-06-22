@@ -36,6 +36,14 @@ let example_implementation = {
           NodeConnection({node_id: "node1", nib_id: "in2"}),
           NodeConnection({node_id: "node2", nib_id: "out2"}),
         ),
+        (
+          GraphConnection({nib_id: "out2"}),
+          NodeConnection({node_id: "node1", nib_id: "out2"}),
+        ),
+        (
+          NodeConnection({node_id: "node2", nib_id: "in1"}),
+          GraphConnection({nib_id: "in1"}),
+        ),
       |],
       ~id=(module ConnectionComparator),
     ),
