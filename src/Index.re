@@ -48,6 +48,10 @@ let graph_definition = {
       ~id=(module LanguageComparator),
     ),
   implementation: example_implementation,
+  display: {
+    inputOrder: ["in1", "in2"],
+    outputOrder: ["out1", "out2"],
+  },
 };
 
 let definition = Graph(graph_definition);

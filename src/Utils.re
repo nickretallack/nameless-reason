@@ -10,3 +10,15 @@ let renderArray = (fn, array) => ReasonReact.array(Array.map(fn, array));
 
 let getDocumentation = definition =>
   Belt.Map.getExn(definition.documentation, "en");
+
+let rec indexOfW = (needle, haystack, acc) =>
+  switch (haystack) {
+  | [] => raise(Not_found)
+  | [head, ...rest] =>
+    if (head == needle) {
+      acc;
+    } else {
+      indexOfW(needle, rest, acc + 1);
+    }
+  };
+let indexOf = (needle, haystack) => indexOfW(needle, haystack, 0);

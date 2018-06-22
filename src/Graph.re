@@ -8,6 +8,8 @@ let make = (~definition, ~definitions, ~size, _children) => {
   render: _self => {
     let getDefinition = definition_id =>
       Belt.Map.getExn(definitions, definition_id);
+    let getNode = node_id =>
+      Belt.Map.getExn(definition.implementation.nodes, node_id);
     let documentation = getDocumentation(definition);
     let columns =
       TopoSort.topoSort(
@@ -56,9 +58,37 @@ let make = (~definition, ~definitions, ~size, _children) => {
         ),
       );
     let getNodePosition = node_id => Belt.Map.getExn(nodePositions, node_id);
-    let getNibPosition = (nib_connection, _isSink) =>
+
+    let getNibPosition = (nib_connection, isSink) =>
       switch (nib_connection) {
-      | NodeConnection({node_id}) => getNodePosition(node_id)
+      | NodeConnection({node_id, nib_id}) =>
+        let nodePosition = getNodePosition(node_id);
+        let node = getNode(node_id);
+        let definition = getDefinition(node.definition_id);
+        {
+          x: nodePosition.x + (if (isSink) {80} else {0}),
+          y:
+            (
+              (
+                switch (definition) {
+                | Graph({display}) =>
+                  Js.log(display.outputOrder);
+                  Js.log(display.inputOrder);
+                  if (isSink) {
+                    indexOf(nib_id, display.inputOrder);
+                  } else {
+                    indexOf(nib_id, display.outputOrder)
+                    + List.length(display.inputOrder);
+                  };
+                }
+              )
+              + 1
+            )
+            * textHeight
+            + textHeight
+            / 2
+            + nodePosition.y,
+        };
       | GraphConnection(_) => {x: 0, y: size.y / 2}
       };
 
@@ -70,6 +100,17 @@ let make = (~definition, ~definitions, ~size, _children) => {
 
     <div>
       (ReasonReact.string(documentation.name))
+      (
+        renderMap(
+          ((sink, source)) =>
+            <Connection
+              key=(getConnectionKey(sink))
+              sinkPosition=(getNibPosition(sink, true))
+              sourcePosition=(getNibPosition(source, false))
+            />,
+          definition.implementation.connections,
+        )
+      )
       (
         renderMap(
           ((nib_id, name)) =>
@@ -99,17 +140,6 @@ let make = (~definition, ~definitions, ~size, _children) => {
               position=(Belt.Map.getExn(nodePositions, node_id))
             />,
           definition.implementation.nodes,
-        )
-      )
-      (
-        renderMap(
-          ((sink, source)) =>
-            <Connection
-              key=(getConnectionKey(sink))
-              sinkPosition=(getNibPosition(sink, true))
-              sourcePosition=(getNibPosition(source, false))
-            />,
-          definition.implementation.connections,
         )
       )
     </div>;

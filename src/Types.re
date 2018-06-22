@@ -71,9 +71,15 @@ type function_documentation = {
   outputNames: nib_map(string),
 };
 
+type function_display = {
+  inputOrder: list(nib_id),
+  outputOrder: list(nib_id),
+};
+
 type graph_definition = {
   documentation: language_map(function_documentation),
   implementation: graph_implementation,
+  display: function_display,
 };
 
 /* TODO: more types of definitions */
