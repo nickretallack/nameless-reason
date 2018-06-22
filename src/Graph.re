@@ -3,43 +3,6 @@ open Utils;
 
 let component = ReasonReact.statelessComponent("Graph");
 
-let rec topoSort = (nodes, connections) => {
-  let (availableNodes, unavailableNodes) =
-    Belt.Map.partition(nodes, (node_id, _node) =>
-      !
-        Belt.Map.some(connections, (sink, source) =>
-          switch (source) {
-          | GraphConnection(_connection) => false
-          | NodeConnection(connection) =>
-            if (connection.node_id == node_id) {
-              switch (sink) {
-              | NodeConnection(_connection) => true
-              | GraphConnection(_connection) => false
-              };
-            } else {
-              false;
-            }
-          }
-        )
-    );
-  let remainingConnections =
-    Belt.Map.keep(connections, (sink, _source) =>
-      switch (sink) {
-      | GraphConnection(_connection) => false
-      | NodeConnection(connection) =>
-        !
-          Belt.Map.some(availableNodes, (node_id, _node) =>
-            connection.node_id == node_id
-          )
-      }
-    );
-  if (Belt.Map.isEmpty(unavailableNodes)) {
-    [availableNodes];
-  } else {
-    [availableNodes, ...topoSort(unavailableNodes, remainingConnections)];
-  };
-};
-
 let make = (~definition, ~definitions, ~size, _children) => {
   ...component,
   render: _self => {
@@ -47,7 +10,7 @@ let make = (~definition, ~definitions, ~size, _children) => {
       Belt.Map.getExn(definitions, definition_id);
     let documentation = getDocumentation(definition);
     let columns =
-      topoSort(
+      TopoSort.topoSort(
         definition.implementation.nodes,
         definition.implementation.connections,
       );
@@ -92,6 +55,18 @@ let make = (~definition, ~definitions, ~size, _children) => {
           ),
         ),
       );
+    let getNodePosition = node_id => Belt.Map.getExn(nodePositions, node_id);
+    let getNibPosition = (nib_connection, _isSink) =>
+      switch (nib_connection) {
+      | NodeConnection({node_id}) => getNodePosition(node_id)
+      | GraphConnection(_) => {x: 0, y: size.y / 2}
+      };
+
+    let getConnectionKey = sink =>
+      switch (sink) {
+      | NodeConnection({node_id, nib_id}) => node_id ++ nib_id
+      | GraphConnection({nib_id}) => nib_id
+      };
 
     <div>
       (ReasonReact.string(documentation.name))
@@ -124,6 +99,17 @@ let make = (~definition, ~definitions, ~size, _children) => {
               position=(Belt.Map.getExn(nodePositions, node_id))
             />,
           definition.implementation.nodes,
+        )
+      )
+      (
+        renderMap(
+          ((sink, source)) =>
+            <Connection
+              key=(getConnectionKey(sink))
+              sinkPosition=(getNibPosition(sink, true))
+              sourcePosition=(getNibPosition(source, false))
+            />,
+          definition.implementation.connections,
         )
       )
     </div>;
