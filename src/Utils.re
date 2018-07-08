@@ -30,3 +30,11 @@ let rec indexOfW = (needle, haystack, acc) =>
   };
 
 let indexOf = (needle, haystack) => indexOfW(needle, haystack, 0);
+
+[@bs.val]
+external addEventListener : (string, Js.t({..}) => unit) => unit =
+  "window.addEventListener";
+
+[@bs.val] external innerWidth : int = "window.innerWidth";
+
+[@bs.val] external innerHeight : int = "window.innerHeight";
