@@ -93,3 +93,37 @@ module DefinitionComparator =
   });
 type definition_map =
   Belt.Map.t(definition_id, definition, DefinitionComparator.identity);
+
+type pointer_id = string;
+module PointerComparator =
+  Belt.Id.MakeComparable({
+    type t = pointer_id;
+    let cmp = compare;
+  });
+
+type pointer_map('a) =
+  Belt.Map.t(PointerComparator.t, 'a, PointerComparator.identity);
+
+type drawing_connection = {
+  nib_connection,
+  startIsSource: bool,
+  point,
+};
+
+type pointer_action =
+  | DrawingConnection(drawing_connection)
+  | MovingNode(node_id);
+
+type start_drawing_action = {
+  pointer_id: string,
+  drawing_connection,
+};
+
+type continue_drawing_action = {
+  pointer_id: string,
+  point,
+};
+
+type graph_action =
+  | StartDrawing(start_drawing_action)
+  | ContinueDrawing(continue_drawing_action);

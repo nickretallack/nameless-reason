@@ -3,7 +3,7 @@ open Types;
 
 let component = ReasonReact.statelessComponent("Node");
 
-let make = (~definition, ~position, _children) => {
+let make = (~node_id, ~definition, ~position, ~emit, _children) => {
   ...component,
   render: _self => {
     let definition =
@@ -20,7 +20,22 @@ let make = (~definition, ~position, _children) => {
           ((nib_id, name)) =>
             <div className="input" key=nib_id>
               (ReasonReact.string(name))
-              <div className="sink nib" />
+              <div
+                className="sink nib"
+                onMouseDown=(
+                  event =>
+                    emit(
+                      StartDrawing({
+                        pointer_id: "mouse",
+                        drawing_connection: {
+                          nib_connection: NodeConnection({nib_id, node_id}),
+                          point: pointFromMouse(event),
+                          startIsSource: false,
+                        },
+                      }),
+                    )
+                )
+              />
             </div>,
           documentation.inputNames,
         )
@@ -29,7 +44,22 @@ let make = (~definition, ~position, _children) => {
         renderMap(
           ((nib_id, name)) =>
             <div className="output" key=nib_id>
-              <div className="source nib" />
+              <div
+                className="source nib"
+                onMouseDown=(
+                  event =>
+                    emit(
+                      StartDrawing({
+                        pointer_id: "mouse",
+                        drawing_connection: {
+                          nib_connection: NodeConnection({nib_id, node_id}),
+                          point: pointFromMouse(event),
+                          startIsSource: true,
+                        },
+                      }),
+                    )
+                )
+              />
               (ReasonReact.string(name))
             </div>,
           documentation.outputNames,

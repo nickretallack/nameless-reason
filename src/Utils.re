@@ -38,3 +38,8 @@ external addEventListener : (string, Js.t({..}) => unit) => unit =
 [@bs.val] external innerWidth : int = "window.innerWidth";
 
 [@bs.val] external innerHeight : int = "window.innerHeight";
+
+let pointFromMouse = event => {
+  x: ReactEventRe.Mouse.clientX(event),
+  y: ReactEventRe.Mouse.clientY(event),
+};
