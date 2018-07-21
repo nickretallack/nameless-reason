@@ -1,11 +1,56 @@
 open Types;
 open Utils;
 
-let component = ReasonReact.statelessComponent("Graph");
+type pointer_id = string;
+module PointerComparator =
+  Belt.Id.MakeComparable({
+    type t = pointer_id;
+    let cmp = compare;
+  });
+
+type pointer_map('a) =
+  Belt.Map.t(PointerComparator.t, 'a, PointerComparator.identity);
+
+type drawing_connection = {
+  nib_connection,
+  startIsSource: bool,
+  point,
+};
+
+type pointer_action =
+  | DrawingConnection(drawing_connection)
+  | MovingNode(node_id);
+
+type state = {pointers: pointer_map(pointer_action)};
+
+type start_drawing_action = {
+  pointer_id: string,
+  drawing_connection,
+};
+
+type action =
+  | StartDrawing(start_drawing_action);
+
+let component = ReasonReact.reducerComponent("Graph");
 
 let make = (~definition, ~definitions, ~size, _children) => {
   ...component,
-  render: _self => {
+  initialState: () => {
+    pointers: Belt.Map.make(~id=(module PointerComparator)),
+  },
+  reducer: (action, state) =>
+    switch (action) {
+    | StartDrawing({pointer_id, drawing_connection}) =>
+      ReasonReact.Update({
+        pointers:
+          Belt.Map.set(
+            state.pointers,
+            pointer_id,
+            DrawingConnection(drawing_connection),
+          ),
+      })
+    },
+  render: self => {
     let getDefinition = definition_id =>
       Belt.Map.getExn(definitions, definition_id);
     let getNode = node_id =>
@@ -139,6 +184,8 @@ let make = (~definition, ~definitions, ~size, _children) => {
       | GraphConnection({nib_id}) => nib_id
       };
 
+    /* let click = (_event, _self) => Js.log("clicked"); */
+
     <div>
       (ReasonReact.string(documentation.name))
       (
@@ -155,6 +202,32 @@ let make = (~definition, ~definitions, ~size, _children) => {
       )
       (
         renderMap(
+          ((pointer_id, pointer_action)) =>
+            switch (pointer_action) {
+            | DrawingConnection({nib_connection, startIsSource, point}) =>
+              <Connection
+                key=pointer_id
+                sourcePosition=(
+                  startIsSource ?
+                    getNibPosition(nib_connection, false) : point
+                )
+                sinkPosition=(
+                  startIsSource ? point : getNibPosition(nib_connection, true)
+                )
+                nudge=(startIsSource ? 0 : getNibNudge(nib_connection))
+              />
+            | _ => ReasonReact.null
+            },
+          Belt.Map.keep(self.state.pointers, (_, pointer_action) =>
+            switch (pointer_action) {
+            | DrawingConnection(_) => true
+            | _ => false
+            }
+          ),
+        )
+      )
+      (
+        renderMap(
           ((nib_id, name)) =>
             <div
               className="graph input"
@@ -167,7 +240,25 @@ let make = (~definition, ~definitions, ~size, _children) => {
                 )
               )>
               (ReasonReact.string(name))
-              <div className="source nib" />
+              <div
+                className="source nib"
+                onMouseDown=(
+                  event =>
+                    self.send(
+                      StartDrawing({
+                        pointer_id: "mouse",
+                        drawing_connection: {
+                          nib_connection: GraphConnection({nib_id: nib_id}),
+                          point: {
+                            x: ReactEventRe.Mouse.clientX(event),
+                            y: ReactEventRe.Mouse.clientY(event),
+                          },
+                          startIsSource: true,
+                        },
+                      }),
+                    )
+                )
+              />
             </div>,
           documentation.inputNames,
         )
