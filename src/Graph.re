@@ -28,10 +28,21 @@ type start_drawing_action = {
   drawing_connection,
 };
 
+type continue_drawing_action = {
+  pointer_id: string,
+  point,
+};
+
 type action =
-  | StartDrawing(start_drawing_action);
+  | StartDrawing(start_drawing_action)
+  | ContinueDrawing(continue_drawing_action);
 
 let component = ReasonReact.reducerComponent("Graph");
+
+let pointFromMouse = event => {
+  x: ReactEventRe.Mouse.clientX(event),
+  y: ReactEventRe.Mouse.clientY(event),
+};
 
 let make = (~definition, ~definitions, ~size, _children) => {
   ...component,
@@ -49,6 +60,23 @@ let make = (~definition, ~definitions, ~size, _children) => {
             DrawingConnection(drawing_connection),
           ),
       })
+    | ContinueDrawing({pointer_id, point}) =>
+      switch (Belt.Map.get(state.pointers, pointer_id)) {
+      | Some(pointer_action) =>
+        switch (pointer_action) {
+        | DrawingConnection(drawing_connection) =>
+          ReasonReact.Update({
+            pointers:
+              Belt.Map.set(
+                state.pointers,
+                pointer_id,
+                DrawingConnection({...drawing_connection, point}),
+              ),
+          })
+        | _ => ReasonReact.NoUpdate
+        }
+      | None => ReasonReact.NoUpdate
+      }
     },
   render: self => {
     let getDefinition = definition_id =>
@@ -186,7 +214,17 @@ let make = (~definition, ~definitions, ~size, _children) => {
 
     /* let click = (_event, _self) => Js.log("clicked"); */
 
-    <div>
+    <div
+      className="graph"
+      onMouseMove=(
+        event =>
+          self.send(
+            ContinueDrawing({
+              pointer_id: "mouse",
+              point: pointFromMouse(event),
+            }),
+          )
+      )>
       (ReasonReact.string(documentation.name))
       (
         renderMap(
@@ -230,7 +268,7 @@ let make = (~definition, ~definitions, ~size, _children) => {
         renderMap(
           ((nib_id, name)) =>
             <div
-              className="graph input"
+              className="graph-input input"
               key=nib_id
               style=(
                 ReactDOMRe.Style.make(
@@ -249,10 +287,7 @@ let make = (~definition, ~definitions, ~size, _children) => {
                         pointer_id: "mouse",
                         drawing_connection: {
                           nib_connection: GraphConnection({nib_id: nib_id}),
-                          point: {
-                            x: ReactEventRe.Mouse.clientX(event),
-                            y: ReactEventRe.Mouse.clientY(event),
-                          },
+                          point: pointFromMouse(event),
                           startIsSource: true,
                         },
                       }),
@@ -267,7 +302,7 @@ let make = (~definition, ~definitions, ~size, _children) => {
         renderMap(
           ((nib_id, name)) =>
             <div
-              className="graph output"
+              className="graph-output output"
               key=nib_id
               style=(positionStyle(Belt.Map.getExn(outputPositions, nib_id)))>
               <div className="sink nib" />
