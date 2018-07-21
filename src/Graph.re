@@ -305,7 +305,22 @@ let make = (~definition, ~definitions, ~size, _children) => {
               className="graph-output output"
               key=nib_id
               style=(positionStyle(Belt.Map.getExn(outputPositions, nib_id)))>
-              <div className="sink nib" />
+              <div
+                className="sink nib"
+                onMouseDown=(
+                  event =>
+                    self.send(
+                      StartDrawing({
+                        pointer_id: "mouse",
+                        drawing_connection: {
+                          nib_connection: GraphConnection({nib_id: nib_id}),
+                          point: pointFromMouse(event),
+                          startIsSource: false,
+                        },
+                      }),
+                    )
+                )
+              />
               (ReasonReact.string(name))
             </div>,
           documentation.outputNames,
