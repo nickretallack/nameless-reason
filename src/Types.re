@@ -115,15 +115,30 @@ type pointer_action =
   | MovingNode(node_id);
 
 type start_drawing_action = {
-  pointer_id: string,
+  pointer_id,
   drawing_connection,
 };
 
 type continue_drawing_action = {
-  pointer_id: string,
+  pointer_id,
   point,
+};
+
+type finish_drawing_action = {
+  pointer_id,
+  nib_connection,
 };
 
 type graph_action =
   | StartDrawing(start_drawing_action)
-  | ContinueDrawing(continue_drawing_action);
+  | ContinueDrawing(continue_drawing_action)
+  | FinishDrawing(finish_drawing_action);
+
+type create_connection_action = {
+  definition_id,
+  source: nib_connection,
+  sink: nib_connection,
+};
+
+type app_action =
+  | CreateConnection(create_connection_action);

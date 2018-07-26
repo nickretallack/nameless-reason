@@ -71,7 +71,7 @@ let definitions =
 
 ReactDOMRe.renderToElementWithId(
   <WindowSize
-    render=(size => <Graph definition=graph_definition definitions size />)
+    render=(size => <App definitions size definition_id="example" />)
   />,
   "graph",
 );

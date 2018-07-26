@@ -5,7 +5,8 @@ type state = {pointers: pointer_map(pointer_action)};
 
 let component = ReasonReact.reducerComponent("Graph");
 
-let make = (~definition, ~definitions, ~size, _children) => {
+let make =
+    (~definition, ~definition_id, ~definitions, ~size, ~emit, _children) => {
   ...component,
   initialState: () => {
     pointers: Belt.Map.make(~id=(module PointerComparator)),
@@ -38,6 +39,12 @@ let make = (~definition, ~definitions, ~size, _children) => {
         }
       | None => ReasonReact.NoUpdate
       }
+    | FinishDrawing({pointer_id}) =>
+      Belt.Map.has(state.pointers, pointer_id) ?
+        ReasonReact.Update({
+          pointers: Belt.Map.remove(state.pointers, pointer_id),
+        }) :
+        ReasonReact.NoUpdate
     },
   render: self => {
     let getDefinition = definition_id =>
@@ -67,7 +74,7 @@ let make = (~definition, ~definitions, ~size, _children) => {
       )
       * textHeight;
     };
-    let nodePositions =
+    let nodePositions: node_map(point) =
       Belt.Map.mergeMany(
         Belt.Map.make(~id=(module NodeComparator)),
         Array.of_list(
@@ -172,8 +179,6 @@ let make = (~definition, ~definitions, ~size, _children) => {
       | NodeConnection({node_id, nib_id}) => node_id ++ nib_id
       | GraphConnection({nib_id}) => nib_id
       };
-
-    /* let click = (_event, _self) => Js.log("clicked"); */
 
     <div
       className="graph"
@@ -295,7 +300,33 @@ let make = (~definition, ~definitions, ~size, _children) => {
               node_id
               definition=(getDefinition(node.definition_id))
               position=(Belt.Map.getExn(nodePositions, node_id))
-              emit=(action => self.send(action))
+              emit=(
+                action => {
+                  switch (action) {
+                  | FinishDrawing({pointer_id, nib_connection: end_nib}) =>
+                    switch (Belt.Map.get(self.state.pointers, pointer_id)) {
+                    | Some(pointer_action) =>
+                      switch (pointer_action) {
+                      | DrawingConnection({
+                          startIsSource,
+                          nib_connection: start_nib,
+                        }) =>
+                        emit(
+                          CreateConnection({
+                            definition_id,
+                            source: startIsSource ? start_nib : end_nib,
+                            sink: startIsSource ? end_nib : start_nib,
+                          }),
+                        )
+                      | _ => ()
+                      }
+                    | None => ()
+                    }
+                  | _ => ()
+                  };
+                  self.send(action);
+                }
+              )
             />,
           definition.implementation.nodes,
         )

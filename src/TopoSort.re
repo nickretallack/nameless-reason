@@ -1,6 +1,7 @@
 open Types;
 
-let rec topoSort = (nodes, connections) => {
+let rec topoSort =
+        (nodes: node_map(node_implementation), connections: connection_map) => {
   let (availableNodes, unavailableNodes) =
     Belt.Map.partition(nodes, (node_id, _node) =>
       !
