@@ -59,6 +59,10 @@ let make =
       Belt.Map.has(state, pointer_id) ?
         ReasonReact.Update(Belt.Map.remove(state, pointer_id)) :
         ReasonReact.NoUpdate
+    | StopDrawing({pointer_id}) =>
+      Belt.Map.has(state, pointer_id) ?
+        ReasonReact.Update(Belt.Map.remove(state, pointer_id)) :
+        ReasonReact.NoUpdate
     },
   render: self => {
     let getDefinition = (definition_id: definition_id) : definition =>
@@ -230,6 +234,7 @@ let make =
           );
         }
       )
+      onMouseUp=(_ => self.send(StopDrawing({pointer_id: "mouse"})))>
       (ReasonReact.string(documentation.name))
       (
         renderMap(

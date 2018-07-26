@@ -132,10 +132,13 @@ type finish_drawing_action = {
   isSource: bool,
 };
 
+type stop_drawing_action = {pointer_id};
+
 type graph_action =
   | StartDrawing(start_drawing_action)
   | ContinueDrawing(continue_drawing_action)
-  | FinishDrawing(finish_drawing_action);
+  | FinishDrawing(finish_drawing_action)
+  | StopDrawing(stop_drawing_action);
 
 type graph_state = pointer_action_map;
 
