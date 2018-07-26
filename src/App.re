@@ -8,7 +8,6 @@ let make = (~size, ~definitions, ~definition_id, _children) => {
     switch (action) {
     | CreateConnection({definition_id, source, sink}) =>
       let definition = Belt.Map.getExn(state, definition_id);
-      Js.log("hello");
       switch (definition) {
       | Graph(graph_definition) =>
         ReasonReact.Update(
@@ -39,12 +38,7 @@ let make = (~size, ~definitions, ~definition_id, _children) => {
         definition_id
         definitions=self.state
         size
-        emit=(
-          action => {
-            Js.log(action);
-            self.send(action);
-          }
-        )
+        emit=(action => self.send(action))
       />
     },
 };

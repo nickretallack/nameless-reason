@@ -179,6 +179,29 @@ let make =
       | GraphConnection({nib_id}) => nib_id
       };
 
+    let maybeEmit = action =>
+      switch (action) {
+      | FinishDrawing({pointer_id, nib_connection: end_nib, isSource}) =>
+        switch (Belt.Map.get(self.state, pointer_id)) {
+        | Some(pointer_action) =>
+          switch (pointer_action) {
+          | DrawingConnection({startIsSource, nib_connection: start_nib}) =>
+            startIsSource != isSource ?
+              emit(
+                CreateConnection({
+                  definition_id,
+                  source: startIsSource ? start_nib : end_nib,
+                  sink: startIsSource ? end_nib : start_nib,
+                }),
+              ) :
+              ()
+          | _ => ()
+          }
+        | None => ()
+        }
+      | _ => ()
+      };
+
     <div
       className="graph"
       onMouseMove=(
@@ -258,6 +281,18 @@ let make =
                       }),
                     )
                 )
+                onMouseUp=(
+                  _ => {
+                    let action =
+                      FinishDrawing({
+                        pointer_id: "mouse",
+                        nib_connection: GraphConnection({nib_id: nib_id}),
+                        isSource: true,
+                      });
+                    maybeEmit(action);
+                    self.send(action);
+                  }
+                )
               />
             </div>,
           documentation.inputNames,
@@ -285,6 +320,18 @@ let make =
                       }),
                     )
                 )
+                onMouseUp=(
+                  _ => {
+                    let action =
+                      FinishDrawing({
+                        pointer_id: "mouse",
+                        nib_connection: GraphConnection({nib_id: nib_id}),
+                        isSource: false,
+                      });
+                    maybeEmit(action);
+                    self.send(action);
+                  }
+                )
               />
               (ReasonReact.string(name))
             </div>,
@@ -301,35 +348,7 @@ let make =
               position=(Belt.Map.getExn(nodePositions, node_id))
               emit=(
                 action => {
-                  switch (action) {
-                  | FinishDrawing({
-                      pointer_id,
-                      nib_connection: end_nib,
-                      isSource,
-                    }) =>
-                    switch (Belt.Map.get(self.state, pointer_id)) {
-                    | Some(pointer_action) =>
-                      switch (pointer_action) {
-                      | DrawingConnection({
-                          startIsSource,
-                          nib_connection: start_nib,
-                        }) =>
-                        startIsSource != isSource ?
-                          emit(
-                            CreateConnection({
-                              definition_id,
-                              source: startIsSource ? start_nib : end_nib,
-                              sink: startIsSource ? end_nib : start_nib,
-                            }),
-                          ) :
-                          ()
-                      | _ => ()
-                      }
-                    | None => ()
-                    }
-                  | _ => ()
-                  };
-                  Js.log("yo");
+                  maybeEmit(action);
                   self.send(action);
                 }
               )
