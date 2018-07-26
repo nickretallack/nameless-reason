@@ -1,6 +1,11 @@
 open Types;
 open Utils;
 
+module EventTarget = Webapi.Dom.EventTarget;
+let document = Webapi.Dom.Document.asEventTarget(Webapi.Dom.document);
+
+let preventDefault = event => EventRe.preventDefault(event);
+
 let component = ReasonReact.reducerComponent("Graph");
 
 let make =
@@ -13,6 +18,16 @@ let make =
       _children,
     ) => {
   ...component,
+  /* Prevent iOS from scrolling all over the place */
+  didMount: _ =>
+    EventTarget.addEventListenerWithOptions(
+      "touchmove",
+      preventDefault,
+      {"passive": false, "capture": true, "once": false},
+      document,
+    ),
+  willUnmount: _ =>
+    EventTarget.removeEventListener("touchmove", preventDefault, document),
   initialState: () => Belt.Map.make(~id=(module PointerComparator)),
   reducer: (action: graph_action, state: graph_state) =>
     switch (action) {
