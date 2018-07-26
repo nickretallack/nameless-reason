@@ -1,7 +1,9 @@
 open Types;
 open Utils;
 
-let component = ReasonReact.statelessComponent("Nib");
+type react_ref = ref(option(ReasonReact.reactRef));
+
+let component = ReasonReact.reducerComponent("Nib");
 let make =
     (
       ~isSource: bool,
@@ -10,8 +12,24 @@ let make =
       _children,
     ) => {
   ...component,
-  render: _ =>
+  initialState: () => ref(None),
+  reducer: (_: unit, _) => ReasonReact.NoUpdate, /*ReasonReact.Update(action),*/
+  didMount: self =>
+    switch (self.state^) {
+    | Some(element) =>
+      DomRe.Element.addEventListener(
+        "finish-drawing",
+        _ =>
+          emit(
+            FinishDrawing({pointer_id: Touch(0), nib_connection, isSource}),
+          ),
+        element,
+      )
+    | None => ()
+    },
+  render: self =>
     <div
+      ref=(ref => self.state := Js.Nullable.toOption(ref))
       className=(String.concat(" ", [isSource ? "source" : "sink", "nib"]))
       onMouseDown=(
         event =>
@@ -49,6 +67,31 @@ let make =
       onMouseUp=(
         _ =>
           emit(FinishDrawing({pointer_id: Mouse, nib_connection, isSource}))
+      )
+      onTouchEnd=(
+        event =>
+          Array.iter(
+            touch =>
+              EventTargetRe.dispatchEvent(
+                EventRe.makeWithOptions(
+                  "finish-drawing",
+                  {
+                    "detail": {
+                      "identifier": touch##identifier,
+                    },
+                  },
+                ),
+                ElementRe.asEventTarget(
+                  DocumentRe.elementFromPoint(
+                    touch##clientX,
+                    touch##clientY,
+                    DomRe.document,
+                  ),
+                ),
+              )
+              |> ignore,
+            convertToList(ReactEventRe.Touch.changedTouches(event)),
+          )
       )
     />,
 };

@@ -198,10 +198,10 @@ let make =
       | GraphConnection({nib_id}) => nib_id
       };
 
-    let maybeEmit = (action: graph_action) : unit =>
+    let maybeEmit = (action: graph_action, self) : unit =>
       switch (action) {
       | FinishDrawing({pointer_id, nib_connection: end_nib, isSource}) =>
-        switch (Belt.Map.get(self.state, pointer_id)) {
+        switch (Belt.Map.get(self.ReasonReact.state, pointer_id)) {
         | Some(pointer_action) =>
           switch (pointer_action) {
           | DrawingConnection({startIsSource, nib_connection: start_nib}) =>
@@ -220,9 +220,8 @@ let make =
         }
       | _ => ()
       };
-
     let handleNibAction = (action: graph_action, self) : unit => {
-      maybeEmit(action);
+      maybeEmit(action, self);
       self.ReasonReact.send(action);
     };
 
@@ -255,7 +254,17 @@ let make =
             convertToList(ReactEventRe.Touch.changedTouches(event)),
           )
       )
-      onMouseUp=(_ => self.send(StopDrawing({pointer_id: Mouse})))>
+      onMouseUp=(_ => self.send(StopDrawing({pointer_id: Mouse})))
+      onTouchEnd=(
+        event =>
+          Array.iter(
+            touch =>
+              self.send(
+                StopDrawing({pointer_id: Touch(touch##identifier)}),
+              ),
+            convertToList(ReactEventRe.Touch.changedTouches(event)),
+          )
+      )>
       (ReasonReact.string(documentation.name))
       (
         renderMap(
