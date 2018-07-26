@@ -4,7 +4,6 @@ open Utils;
 let document = Webapi.Dom.Document.asEventTarget(Webapi.Dom.document);
 let preventDefault = event => EventRe.preventDefault(event);
 let component = ReasonReact.reducerComponent("Graph");
-
 let make =
     (
       ~definition: graph_definition,
@@ -199,7 +198,7 @@ let make =
       | GraphConnection({nib_id}) => nib_id
       };
 
-    let maybeEmit = action =>
+    let maybeEmit = (action: graph_action) : unit =>
       switch (action) {
       | FinishDrawing({pointer_id, nib_connection: end_nib, isSource}) =>
         switch (Belt.Map.get(self.state, pointer_id)) {
@@ -221,6 +220,11 @@ let make =
         }
       | _ => ()
       };
+
+    let handleNibAction = (action: graph_action, self) : unit => {
+      maybeEmit(action);
+      self.ReasonReact.send(action);
+    };
 
     <div
       className="graph"
@@ -305,56 +309,10 @@ let make =
                 )
               )>
               (ReasonReact.string(name))
-              <div
-                className="source nib"
-                onMouseDown=(
-                  event =>
-                    self.send(
-                      StartDrawing({
-                        pointer_id: Mouse,
-                        drawing_connection: {
-                          nib_connection: GraphConnection({nib_id: nib_id}),
-                          point: pointFromMouse(event),
-                          startIsSource: true,
-                        },
-                      }),
-                    )
-                )
-                onTouchStart=(
-                  event =>
-                    Array.iter(
-                      touch =>
-                        self.send(
-                          StartDrawing({
-                            pointer_id: Touch(touch##identifier),
-                            drawing_connection: {
-                              nib_connection:
-                                GraphConnection({nib_id: nib_id}),
-                              point: {
-                                x: touch##clientX,
-                                y: touch##clientY,
-                              },
-                              startIsSource: true,
-                            },
-                          }),
-                        ),
-                      convertToList(
-                        ReactEventRe.Touch.changedTouches(event),
-                      ),
-                    )
-                )
-                onMouseUp=(
-                  _ => {
-                    let action =
-                      FinishDrawing({
-                        pointer_id: Mouse,
-                        nib_connection: GraphConnection({nib_id: nib_id}),
-                        isSource: true,
-                      });
-                    maybeEmit(action);
-                    self.send(action);
-                  }
-                )
+              <Nib
+                isSource=true
+                nib_connection=(GraphConnection({nib_id: nib_id}))
+                emit=(self.handle(handleNibAction))
               />
             </div>,
           documentation.inputNames,
@@ -367,33 +325,10 @@ let make =
               className="graph-output output"
               key=nib_id
               style=(positionStyle(Belt.Map.getExn(outputPositions, nib_id)))>
-              <div
-                className="sink nib"
-                onMouseDown=(
-                  event =>
-                    self.send(
-                      StartDrawing({
-                        pointer_id: Mouse,
-                        drawing_connection: {
-                          nib_connection: GraphConnection({nib_id: nib_id}),
-                          point: pointFromMouse(event),
-                          startIsSource: false,
-                        },
-                      }),
-                    )
-                )
-                onMouseUp=(
-                  _ => {
-                    let action =
-                      FinishDrawing({
-                        pointer_id: Mouse,
-                        nib_connection: GraphConnection({nib_id: nib_id}),
-                        isSource: false,
-                      });
-                    maybeEmit(action);
-                    self.send(action);
-                  }
-                )
+              <Nib
+                isSource=false
+                nib_connection=(GraphConnection({nib_id: nib_id}))
+                emit=(self.handle(handleNibAction))
               />
               (ReasonReact.string(name))
             </div>,
@@ -408,12 +343,7 @@ let make =
               node_id
               definition=(getDefinition(node.definition_id))
               position=(Belt.Map.getExn(nodePositions, node_id))
-              emit=(
-                action => {
-                  maybeEmit(action);
-                  self.send(action);
-                }
-              )
+              emit=(self.handle(handleNibAction))
             />,
           definition.implementation.nodes,
         )

@@ -27,31 +27,10 @@ let make =
           ((nib_id, name)) =>
             <div className="input" key=nib_id>
               (ReasonReact.string(name))
-              <div
-                className="sink nib"
-                onMouseDown=(
-                  event =>
-                    emit(
-                      StartDrawing({
-                        pointer_id: Mouse,
-                        drawing_connection: {
-                          nib_connection: NodeConnection({nib_id, node_id}),
-                          point: pointFromMouse(event),
-                          startIsSource: false,
-                        },
-                      }),
-                    )
-                )
-                onMouseUp=(
-                  _ =>
-                    emit(
-                      FinishDrawing({
-                        pointer_id: Mouse,
-                        nib_connection: NodeConnection({nib_id, node_id}),
-                        isSource: false,
-                      }),
-                    )
-                )
+              <Nib
+                isSource=false
+                nib_connection=(NodeConnection({nib_id, node_id}))
+                emit
               />
             </div>,
           documentation.inputNames,
@@ -61,31 +40,10 @@ let make =
         renderMap(
           ((nib_id, name)) =>
             <div className="output" key=nib_id>
-              <div
-                className="source nib"
-                onMouseDown=(
-                  event =>
-                    emit(
-                      StartDrawing({
-                        pointer_id: Mouse,
-                        drawing_connection: {
-                          nib_connection: NodeConnection({nib_id, node_id}),
-                          point: pointFromMouse(event),
-                          startIsSource: true,
-                        },
-                      }),
-                    )
-                )
-                onMouseUp=(
-                  _ =>
-                    emit(
-                      FinishDrawing({
-                        pointer_id: Mouse,
-                        nib_connection: NodeConnection({nib_id, node_id}),
-                        isSource: true,
-                      }),
-                    )
-                )
+              <Nib
+                isSource=true
+                nib_connection=(NodeConnection({nib_id, node_id}))
+                emit
               />
               (ReasonReact.string(name))
             </div>,
