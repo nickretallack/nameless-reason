@@ -1,6 +1,7 @@
 {
   "name": "nameless-reason",
   "version": "0.1.0",
+  "description": "IDE for the Nameless programming language.",
   "scripts": {
     "build": "bsb -make-world",
     "start": "bsb -make-world -w",
@@ -12,7 +13,11 @@
   "keywords": [
     "BuckleScript"
   ],
-  "author": "",
+  "author": {
+    "name": "Nick Retallack",
+    "email": "nickretallack@gmail.com",
+    "url": "https://nickretallack.com"
+  },
   "license": "MIT",
   "dependencies": {
     "bs-webapi": "^0.10.0",
