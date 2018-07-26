@@ -42,6 +42,16 @@ let make =
                       }),
                     )
                 )
+                onMouseUp=(
+                  _ =>
+                    emit(
+                      FinishDrawing({
+                        pointer_id: "mouse",
+                        nib_connection: NodeConnection({nib_id, node_id}),
+                        isSource: false,
+                      }),
+                    )
+                )
               />
             </div>,
           documentation.inputNames,
@@ -63,6 +73,16 @@ let make =
                           point: pointFromMouse(event),
                           startIsSource: true,
                         },
+                      }),
+                    )
+                )
+                onMouseUp=(
+                  _ =>
+                    emit(
+                      FinishDrawing({
+                        pointer_id: "mouse",
+                        nib_connection: NodeConnection({nib_id, node_id}),
+                        isSource: true,
                       }),
                     )
                 )

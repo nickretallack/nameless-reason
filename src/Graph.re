@@ -1,8 +1,6 @@
 open Types;
 open Utils;
 
-type state = {pointers: pointer_map(pointer_action)};
-
 let component = ReasonReact.reducerComponent("Graph");
 
 let make =
@@ -15,46 +13,40 @@ let make =
       _children,
     ) => {
   ...component,
-  initialState: () => {
-    pointers: Belt.Map.make(~id=(module PointerComparator)),
-  },
-  reducer: (action, state) =>
+  initialState: () => Belt.Map.make(~id=(module PointerComparator)),
+  reducer: (action: graph_action, state: graph_state) =>
     switch (action) {
     | StartDrawing({pointer_id, drawing_connection}) =>
-      ReasonReact.Update({
-        pointers:
-          Belt.Map.set(
-            state.pointers,
-            pointer_id,
-            DrawingConnection(drawing_connection),
-          ),
-      })
+      ReasonReact.Update(
+        Belt.Map.set(
+          state,
+          pointer_id,
+          DrawingConnection(drawing_connection),
+        ),
+      )
     | ContinueDrawing({pointer_id, point}) =>
-      switch (Belt.Map.get(state.pointers, pointer_id)) {
+      switch (Belt.Map.get(state, pointer_id)) {
       | Some(pointer_action) =>
         switch (pointer_action) {
         | DrawingConnection(drawing_connection) =>
-          ReasonReact.Update({
-            pointers:
-              Belt.Map.set(
-                state.pointers,
-                pointer_id,
-                DrawingConnection({...drawing_connection, point}),
-              ),
-          })
+          ReasonReact.Update(
+            Belt.Map.set(
+              state,
+              pointer_id,
+              DrawingConnection({...drawing_connection, point}),
+            ),
+          )
         | _ => ReasonReact.NoUpdate
         }
       | None => ReasonReact.NoUpdate
       }
     | FinishDrawing({pointer_id}) =>
-      Belt.Map.has(state.pointers, pointer_id) ?
-        ReasonReact.Update({
-          pointers: Belt.Map.remove(state.pointers, pointer_id),
-        }) :
+      Belt.Map.has(state, pointer_id) ?
+        ReasonReact.Update(Belt.Map.remove(state, pointer_id)) :
         ReasonReact.NoUpdate
     },
   render: self => {
-    let getDefinition = definition_id =>
+    let getDefinition = (definition_id: definition_id) : definition =>
       Belt.Map.getExn(definitions, definition_id);
     let getNode = node_id =>
       Belt.Map.getExn(definition.implementation.nodes, node_id);
@@ -68,7 +60,7 @@ let make =
     let nodeWidth = 80;
     let textHeight = 20;
 
-    let nodeHeight = node => {
+    let nodeHeight = (node: node_implementation) => {
       let definition =
         switch (getDefinition(node.definition_id)) {
         | Graph(definition) => definition
@@ -90,7 +82,7 @@ let make =
               (column, nodes: node_map(node_implementation)) => {
                 let rowHeight = size.y / (Belt.Map.size(nodes) + 1);
                 List.mapi(
-                  (row, (node_id, node)) => (
+                  (row, (node_id, node: node_implementation)) => (
                     node_id,
                     {
                       x: columnWidth * (column + 1) - nodeWidth / 2,
@@ -229,7 +221,7 @@ let make =
               />
             | _ => ReasonReact.null
             },
-          Belt.Map.keep(self.state.pointers, (_, pointer_action) =>
+          Belt.Map.keep(self.state, (_, pointer_action) =>
             switch (pointer_action) {
             | DrawingConnection(_) => true
             | _ => false
@@ -301,7 +293,7 @@ let make =
       )
       (
         renderMap(
-          ((node_id, node)) =>
+          ((node_id: node_id, node: node_implementation)) =>
             <Node
               key=node_id
               node_id
@@ -310,27 +302,34 @@ let make =
               emit=(
                 action => {
                   switch (action) {
-                  | FinishDrawing({pointer_id, nib_connection: end_nib}) =>
-                    switch (Belt.Map.get(self.state.pointers, pointer_id)) {
+                  | FinishDrawing({
+                      pointer_id,
+                      nib_connection: end_nib,
+                      isSource,
+                    }) =>
+                    switch (Belt.Map.get(self.state, pointer_id)) {
                     | Some(pointer_action) =>
                       switch (pointer_action) {
                       | DrawingConnection({
                           startIsSource,
                           nib_connection: start_nib,
                         }) =>
-                        emit(
-                          CreateConnection({
-                            definition_id,
-                            source: startIsSource ? start_nib : end_nib,
-                            sink: startIsSource ? end_nib : start_nib,
-                          }),
-                        )
+                        startIsSource != isSource ?
+                          emit(
+                            CreateConnection({
+                              definition_id,
+                              source: startIsSource ? start_nib : end_nib,
+                              sink: startIsSource ? end_nib : start_nib,
+                            }),
+                          ) :
+                          ()
                       | _ => ()
                       }
                     | None => ()
                     }
                   | _ => ()
                   };
+                  Js.log("yo");
                   self.send(action);
                 }
               )
