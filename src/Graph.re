@@ -6,7 +6,14 @@ type state = {pointers: pointer_map(pointer_action)};
 let component = ReasonReact.reducerComponent("Graph");
 
 let make =
-    (~definition, ~definition_id, ~definitions, ~size, ~emit, _children) => {
+    (
+      ~definition: graph_definition,
+      ~definition_id: definition_id,
+      ~definitions: definition_map,
+      ~size: point,
+      ~emit: app_action => unit,
+      _children,
+    ) => {
   ...component,
   initialState: () => {
     pointers: Belt.Map.make(~id=(module PointerComparator)),
@@ -52,7 +59,7 @@ let make =
     let getNode = node_id =>
       Belt.Map.getExn(definition.implementation.nodes, node_id);
     let documentation = getDocumentation(definition);
-    let columns =
+    let columns: list(node_map(node_implementation)) =
       TopoSort.topoSort(
         definition.implementation.nodes,
         definition.implementation.connections,
@@ -80,7 +87,7 @@ let make =
         Array.of_list(
           List.flatten(
             List.mapi(
-              (column, nodes) => {
+              (column, nodes: node_map(node_implementation)) => {
                 let rowHeight = size.y / (Belt.Map.size(nodes) + 1);
                 List.mapi(
                   (row, (node_id, node)) => (

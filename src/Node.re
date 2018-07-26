@@ -3,7 +3,14 @@ open Types;
 
 let component = ReasonReact.statelessComponent("Node");
 
-let make = (~node_id, ~definition, ~position, ~emit, _children) => {
+let make =
+    (
+      ~node_id: node_id,
+      ~definition: definition,
+      ~position: point,
+      ~emit: graph_action => unit,
+      _children,
+    ) => {
   ...component,
   render: _self => {
     let definition =
