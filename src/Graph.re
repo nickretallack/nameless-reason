@@ -3,7 +3,6 @@ open Utils;
 
 let document = Webapi.Dom.Document.asEventTarget(Webapi.Dom.document);
 let preventDefault = event => EventRe.preventDefault(event);
-
 let component = ReasonReact.reducerComponent("Graph");
 
 let make =
@@ -230,13 +229,29 @@ let make =
           ReactEventRe.Mouse.preventDefault(event);
           self.send(
             ContinueDrawing({
-              pointer_id: "mouse",
+              pointer_id: Mouse,
               point: pointFromMouse(event),
             }),
           );
         }
       )
-      onMouseUp=(_ => self.send(StopDrawing({pointer_id: "mouse"})))>
+      onTouchMove=(
+        event =>
+          Array.iter(
+            touch =>
+              self.send(
+                ContinueDrawing({
+                  pointer_id: Touch(touch##identifier),
+                  point: {
+                    x: touch##clientX,
+                    y: touch##clientY,
+                  },
+                }),
+              ),
+            convertToList(ReactEventRe.Touch.changedTouches(event)),
+          )
+      )
+      onMouseUp=(_ => self.send(StopDrawing({pointer_id: Mouse})))>
       (ReasonReact.string(documentation.name))
       (
         renderMap(
@@ -252,11 +267,11 @@ let make =
       )
       (
         renderMap(
-          ((pointer_id, pointer_action)) =>
+          ((pointer_id: pointer_id, pointer_action: pointer_action)) =>
             switch (pointer_action) {
             | DrawingConnection({nib_connection, startIsSource, point}) =>
               <Connection
-                key=pointer_id
+                key=(string_of_pointer_id(pointer_id))
                 sourcePosition=(
                   startIsSource ?
                     getNibPosition(nib_connection, false) : point
@@ -268,7 +283,7 @@ let make =
               />
             | _ => ReasonReact.null
             },
-          Belt.Map.keep(self.state, (_, pointer_action) =>
+          Belt.Map.keep(self.state, (_, pointer_action: pointer_action) =>
             switch (pointer_action) {
             | DrawingConnection(_) => true
             | _ => false
@@ -296,7 +311,7 @@ let make =
                   event =>
                     self.send(
                       StartDrawing({
-                        pointer_id: "mouse",
+                        pointer_id: Mouse,
                         drawing_connection: {
                           nib_connection: GraphConnection({nib_id: nib_id}),
                           point: pointFromMouse(event),
@@ -305,11 +320,34 @@ let make =
                       }),
                     )
                 )
+                onTouchStart=(
+                  event =>
+                    Array.iter(
+                      touch =>
+                        self.send(
+                          StartDrawing({
+                            pointer_id: Touch(touch##identifier),
+                            drawing_connection: {
+                              nib_connection:
+                                GraphConnection({nib_id: nib_id}),
+                              point: {
+                                x: touch##clientX,
+                                y: touch##clientY,
+                              },
+                              startIsSource: true,
+                            },
+                          }),
+                        ),
+                      convertToList(
+                        ReactEventRe.Touch.changedTouches(event),
+                      ),
+                    )
+                )
                 onMouseUp=(
                   _ => {
                     let action =
                       FinishDrawing({
-                        pointer_id: "mouse",
+                        pointer_id: Mouse,
                         nib_connection: GraphConnection({nib_id: nib_id}),
                         isSource: true,
                       });
@@ -335,7 +373,7 @@ let make =
                   event =>
                     self.send(
                       StartDrawing({
-                        pointer_id: "mouse",
+                        pointer_id: Mouse,
                         drawing_connection: {
                           nib_connection: GraphConnection({nib_id: nib_id}),
                           point: pointFromMouse(event),
@@ -348,7 +386,7 @@ let make =
                   _ => {
                     let action =
                       FinishDrawing({
-                        pointer_id: "mouse",
+                        pointer_id: Mouse,
                         nib_connection: GraphConnection({nib_id: nib_id}),
                         isSource: false,
                       });

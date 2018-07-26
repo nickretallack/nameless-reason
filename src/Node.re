@@ -33,7 +33,7 @@ let make =
                   event =>
                     emit(
                       StartDrawing({
-                        pointer_id: "mouse",
+                        pointer_id: Mouse,
                         drawing_connection: {
                           nib_connection: NodeConnection({nib_id, node_id}),
                           point: pointFromMouse(event),
@@ -46,7 +46,7 @@ let make =
                   _ =>
                     emit(
                       FinishDrawing({
-                        pointer_id: "mouse",
+                        pointer_id: Mouse,
                         nib_connection: NodeConnection({nib_id, node_id}),
                         isSource: false,
                       }),
@@ -67,7 +67,7 @@ let make =
                   event =>
                     emit(
                       StartDrawing({
-                        pointer_id: "mouse",
+                        pointer_id: Mouse,
                         drawing_connection: {
                           nib_connection: NodeConnection({nib_id, node_id}),
                           point: pointFromMouse(event),
@@ -80,7 +80,7 @@ let make =
                   _ =>
                     emit(
                       FinishDrawing({
-                        pointer_id: "mouse",
+                        pointer_id: Mouse,
                         nib_connection: NodeConnection({nib_id, node_id}),
                         isSource: true,
                       }),

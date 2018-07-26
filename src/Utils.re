@@ -43,3 +43,11 @@ let pointFromMouse = event => {
   x: ReactEventRe.Mouse.clientX(event),
   y: ReactEventRe.Mouse.clientY(event),
 };
+
+external convertToList : Js.t('a) => array('b) = "%identity";
+
+let string_of_pointer_id = pointer_id =>
+  switch (pointer_id) {
+  | Mouse => "mouse"
+  | Touch(id) => "touch-" ++ string_of_int(id)
+  };

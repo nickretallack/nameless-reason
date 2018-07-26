@@ -94,7 +94,10 @@ module DefinitionComparator =
 type definition_map =
   Belt.Map.t(definition_id, definition, DefinitionComparator.identity);
 
-type pointer_id = string;
+type pointer_id =
+  | Mouse
+  | Touch(int);
+
 module PointerComparator =
   Belt.Id.MakeComparable({
     type t = pointer_id;
