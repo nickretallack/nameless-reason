@@ -161,16 +161,16 @@ let make =
         )
       };
 
-    let getNibNudge = sink =>
-      switch (sink) {
+    let getNibNudge = source =>
+      switch (source) {
       | NodeConnection({node_id, nib_id}) =>
         let node = getNode(node_id);
         let definition = getDefinition(node.definition_id);
         switch (definition) {
-        | Graph({display}) => indexOf(nib_id, display.inputOrder)
+        | Graph({display}) => indexOf(nib_id, display.outputOrder)
         };
       | GraphConnection({nib_id}) =>
-        indexOf(nib_id, definition.display.outputOrder)
+        indexOf(nib_id, definition.display.inputOrder)
       };
 
     let getConnectionKey = sink =>
@@ -221,7 +221,7 @@ let make =
               key=(getConnectionKey(sink))
               sinkPosition=(getNibPosition(sink, true))
               sourcePosition=(getNibPosition(source, false))
-              nudge=(getNibNudge(sink))
+              nudge=(getNibNudge(source))
             />,
           definition.implementation.connections,
         )
@@ -240,7 +240,7 @@ let make =
                 sinkPosition=(
                   startIsSource ? point : getNibPosition(nib_connection, true)
                 )
-                nudge=(startIsSource ? 0 : getNibNudge(nib_connection))
+                nudge=(startIsSource ? getNibNudge(nib_connection) : 0)
               />
             | _ => ReasonReact.null
             },
