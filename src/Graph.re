@@ -220,14 +220,16 @@ let make =
     <div
       className="graph"
       onMouseMove=(
-        event =>
+        event => {
+          ReactEventRe.Mouse.preventDefault(event);
           self.send(
             ContinueDrawing({
               pointer_id: "mouse",
               point: pointFromMouse(event),
             }),
-          )
-      )>
+          );
+        }
+      )
       (ReasonReact.string(documentation.name))
       (
         renderMap(
