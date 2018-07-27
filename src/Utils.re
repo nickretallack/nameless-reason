@@ -51,3 +51,9 @@ let string_of_pointer_id = pointer_id =>
   | Mouse => "mouse"
   | Touch(id) => "touch-" ++ string_of_int(id)
   };
+
+let iterateTouches = (event, callback) =>
+  Array.iter(
+    callback,
+    convertToList(ReactEventRe.Touch.changedTouches(event)),
+  );

@@ -240,29 +240,23 @@ let make =
       )
       onTouchMove=(
         event =>
-          Array.iter(
-            touch =>
-              self.send(
-                ContinueDrawing({
-                  pointer_id: Touch(touch##identifier),
-                  point: {
-                    x: touch##clientX,
-                    y: touch##clientY,
-                  },
-                }),
-              ),
-            convertToList(ReactEventRe.Touch.changedTouches(event)),
+          iterateTouches(event, touch =>
+            self.send(
+              ContinueDrawing({
+                pointer_id: Touch(touch##identifier),
+                point: {
+                  x: touch##clientX,
+                  y: touch##clientY,
+                },
+              }),
+            )
           )
       )
       onMouseUp=(_ => self.send(StopDrawing({pointer_id: Mouse})))
       onTouchEnd=(
         event =>
-          Array.iter(
-            touch =>
-              self.send(
-                StopDrawing({pointer_id: Touch(touch##identifier)}),
-              ),
-            convertToList(ReactEventRe.Touch.changedTouches(event)),
+          iterateTouches(event, touch =>
+            self.send(StopDrawing({pointer_id: Touch(touch##identifier)}))
           )
       )>
       (ReasonReact.string(documentation.name))

@@ -46,22 +46,20 @@ let make =
       )
       onTouchStart=(
         event =>
-          Array.iter(
-            touch =>
-              emit(
-                StartDrawing({
-                  pointer_id: Touch(touch##identifier),
-                  drawing_connection: {
-                    nib_connection,
-                    point: {
-                      x: touch##clientX,
-                      y: touch##clientY,
-                    },
-                    startIsSource: isSource,
+          iterateTouches(event, touch =>
+            emit(
+              StartDrawing({
+                pointer_id: Touch(touch##identifier),
+                drawing_connection: {
+                  nib_connection,
+                  point: {
+                    x: touch##clientX,
+                    y: touch##clientY,
                   },
-                }),
-              ),
-            convertToList(ReactEventRe.Touch.changedTouches(event)),
+                  startIsSource: isSource,
+                },
+              }),
+            )
           )
       )
       onMouseUp=(
@@ -70,27 +68,25 @@ let make =
       )
       onTouchEnd=(
         event =>
-          Array.iter(
-            touch =>
-              EventTargetRe.dispatchEvent(
-                EventRe.makeWithOptions(
-                  "finish-drawing",
-                  {
-                    "detail": {
-                      "identifier": touch##identifier,
-                    },
+          iterateTouches(event, touch =>
+            EventTargetRe.dispatchEvent(
+              EventRe.makeWithOptions(
+                "finish-drawing",
+                {
+                  "detail": {
+                    "identifier": touch##identifier,
                   },
+                },
+              ),
+              ElementRe.asEventTarget(
+                DocumentRe.elementFromPoint(
+                  touch##clientX,
+                  touch##clientY,
+                  DomRe.document,
                 ),
-                ElementRe.asEventTarget(
-                  DocumentRe.elementFromPoint(
-                    touch##clientX,
-                    touch##clientY,
-                    DomRe.document,
-                  ),
-                ),
-              )
-              |> ignore,
-            convertToList(ReactEventRe.Touch.changedTouches(event)),
+              ),
+            )
+            |> ignore
           )
       )
     />,
