@@ -1,3 +1,4 @@
+[%%debugger.chrome];
 open Types;
 let component = ReasonReact.reducerComponent("App");
 
