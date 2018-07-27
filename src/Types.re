@@ -151,7 +151,13 @@ type create_connection_action = {
   sink: nib_connection,
 };
 
+type change_name_action = {
+  definition_id,
+  name: string,
+};
+
 type app_action =
-  | CreateConnection(create_connection_action);
+  | CreateConnection(create_connection_action)
+  | ChangeName(change_name_action);
 
 type app_state = definition_map;

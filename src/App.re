@@ -30,6 +30,28 @@ let make = (~size, ~definitions, ~definition_id, _children) => {
           ),
         )
       };
+    | ChangeName({definition_id, name}) =>
+      let definition = Belt.Map.getExn(state, definition_id);
+      switch (definition) {
+      | Graph(graph_definition) =>
+        let documentation =
+          Belt.Map.getExn(graph_definition.documentation, "en");
+        ReasonReact.Update(
+          Belt.Map.set(
+            state,
+            definition_id,
+            Graph({
+              ...graph_definition,
+              documentation:
+                Belt.Map.set(
+                  graph_definition.documentation,
+                  "en",
+                  {...documentation, name},
+                ),
+            }),
+          ),
+        );
+      };
     },
   render: self =>
     switch (Belt.Map.getExn(self.state, definition_id)) {

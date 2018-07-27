@@ -226,6 +226,9 @@ let make =
       self.ReasonReact.send(action);
     };
 
+    let changeName = event =>
+      emit(ChangeName({definition_id, name: getEventValue(event)}));
+
     <div
       className="graph"
       onMouseMove=(
@@ -260,7 +263,7 @@ let make =
             self.send(StopDrawing({pointer_id: Touch(touch##identifier)}))
           )
       )>
-      (ReasonReact.string(documentation.name))
+      <input type_="text" value=documentation.name onChange=changeName />
       (
         renderMap(
           ((sink, source)) =>

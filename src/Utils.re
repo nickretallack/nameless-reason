@@ -62,3 +62,7 @@ let iterateTouches = (event, callback) =>
 external dispatchCustomEvent : Dom.customEvent => bool = "dispatchEvent";
 
 [@bs.get] external getEventDetail : Dom.event => Js.t({..}) = "detail";
+
+let getEventValue = event => ReactDOMRe.domElementToObj(
+                               ReactEventRe.Form.target(event),
+                             )##value;
