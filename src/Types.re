@@ -17,6 +17,7 @@ module NodeComparator =
   });
 type node_map('a) =
   Belt.Map.t(NodeComparator.t, 'a, NodeComparator.identity);
+type node_id_set = Belt.Set.t(NodeComparator.t, NodeComparator.identity);
 
 module LanguageComparator =
   Belt.Id.MakeComparable({

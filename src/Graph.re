@@ -69,22 +69,33 @@ let make =
         switch (pointer_action) {
         | DrawingConnection({startIsSource, nib_connection: start_nib}) =>
           startIsSource != isSource ?
-            ReasonReact.UpdateWithSideEffects(
-              {
-                error: None,
-                pointers: Belt.Map.remove(state.pointers, pointer_id),
-              },
-              (
-                _ =>
-                  emit(
-                    CreateConnection({
-                      definition_id,
-                      source: startIsSource ? start_nib : end_nib,
-                      sink: startIsSource ? end_nib : start_nib,
-                    }),
-                  )
+            DetectCycles.detectCycles(
+              Belt.Map.set(
+                definition.implementation.connections,
+                startIsSource ? end_nib : start_nib,
+                startIsSource ? start_nib : end_nib,
               ),
-            ) :
+            ) ?
+              ReasonReact.Update({
+                ...state,
+                error: Some("Can't create cycles"),
+              }) :
+              ReasonReact.UpdateWithSideEffects(
+                {
+                  error: None,
+                  pointers: Belt.Map.remove(state.pointers, pointer_id),
+                },
+                (
+                  _ =>
+                    emit(
+                      CreateConnection({
+                        definition_id,
+                        source: startIsSource ? start_nib : end_nib,
+                        sink: startIsSource ? end_nib : start_nib,
+                      }),
+                    )
+                ),
+              ) :
             ReasonReact.Update({
               ...state,
               error:
