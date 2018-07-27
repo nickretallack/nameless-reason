@@ -276,7 +276,19 @@ let make =
             self.send(StopDrawing({pointer_id: Touch(touch##identifier)}))
           )
       )>
-      <input type_="text" value=documentation.name onChange=changeName />
+      <input
+        type_="text"
+        className="graph-name"
+        value=documentation.name
+        onChange=changeName
+      />
+      (
+        switch (self.state.error) {
+        | Some(error) =>
+          <div className="error-message"> (ReasonReact.string(error)) </div>
+        | None => ReasonReact.null
+        }
+      )
       (
         renderMap(
           ((sink, source)) =>
