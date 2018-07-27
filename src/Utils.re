@@ -57,3 +57,8 @@ let iterateTouches = (event, callback) =>
     callback,
     convertToList(ReactEventRe.Touch.changedTouches(event)),
   );
+
+[@bs.send.pipe: Dom.element]
+external dispatchCustomEvent : Dom.customEvent => bool = "dispatchEvent";
+
+[@bs.get] external getEventDetail : Dom.event => Js.t({..}) = "detail";

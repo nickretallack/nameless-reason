@@ -17,11 +17,15 @@ let make =
   didMount: self =>
     switch (self.state^) {
     | Some(element) =>
-      DomRe.Element.addEventListener(
+      ElementRe.addEventListener(
         "finish-drawing",
-        _ =>
+        event =>
           emit(
-            FinishDrawing({pointer_id: Touch(0), nib_connection, isSource}),
+            FinishDrawing({
+              pointer_id: Touch(getEventDetail(event)##identifier),
+              nib_connection,
+              isSource,
+            }),
           ),
         element,
       )
@@ -69,8 +73,8 @@ let make =
       onTouchEnd=(
         event =>
           iterateTouches(event, touch =>
-            EventTargetRe.dispatchEvent(
-              EventRe.makeWithOptions(
+            dispatchCustomEvent(
+              CustomEventRe.makeWithOptions(
                 "finish-drawing",
                 {
                   "detail": {
@@ -78,12 +82,10 @@ let make =
                   },
                 },
               ),
-              ElementRe.asEventTarget(
-                DocumentRe.elementFromPoint(
-                  touch##clientX,
-                  touch##clientY,
-                  DomRe.document,
-                ),
+              DocumentRe.elementFromPoint(
+                touch##clientX,
+                touch##clientY,
+                DomRe.document,
               ),
             )
             |> ignore
