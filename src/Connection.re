@@ -33,7 +33,7 @@ let make =
 
     let sharedStyle =
       ReactDOMRe.Style.make(
-        ~height=pixels((height - strokeWidth) / 2),
+        ~height=pixels(height / 2),
         ~position="absolute",
         ~borderStyle="solid",
         ~borderColor=palette[nudge mod Array.length(palette)],
