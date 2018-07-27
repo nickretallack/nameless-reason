@@ -29,40 +29,53 @@ let make =
       preventDefault,
       document,
     ),
-  initialState: () => Belt.Map.make(~id=(module PointerComparator)),
+  initialState: () => {
+    error: None,
+    pointers: Belt.Map.make(~id=(module PointerComparator)),
+  },
   reducer: (action: graph_action, state: graph_state) =>
     switch (action) {
     | StartDrawing({pointer_id, drawing_connection}) =>
-      ReasonReact.Update(
-        Belt.Map.set(
-          state,
-          pointer_id,
-          DrawingConnection(drawing_connection),
-        ),
-      )
+      ReasonReact.Update({
+        ...state,
+        pointers:
+          Belt.Map.set(
+            state.pointers,
+            pointer_id,
+            DrawingConnection(drawing_connection),
+          ),
+      })
     | ContinueDrawing({pointer_id, point}) =>
-      switch (Belt.Map.get(state, pointer_id)) {
+      switch (Belt.Map.get(state.pointers, pointer_id)) {
       | Some(pointer_action) =>
         switch (pointer_action) {
         | DrawingConnection(drawing_connection) =>
-          ReasonReact.Update(
-            Belt.Map.set(
-              state,
-              pointer_id,
-              DrawingConnection({...drawing_connection, point}),
-            ),
-          )
+          ReasonReact.Update({
+            ...state,
+            pointers:
+              Belt.Map.set(
+                state.pointers,
+                pointer_id,
+                DrawingConnection({...drawing_connection, point}),
+              ),
+          })
         | _ => ReasonReact.NoUpdate
         }
       | None => ReasonReact.NoUpdate
       }
     | FinishDrawing({pointer_id}) =>
-      Belt.Map.has(state, pointer_id) ?
-        ReasonReact.Update(Belt.Map.remove(state, pointer_id)) :
+      Belt.Map.has(state.pointers, pointer_id) ?
+        ReasonReact.Update({
+          ...state,
+          pointers: Belt.Map.remove(state.pointers, pointer_id),
+        }) :
         ReasonReact.NoUpdate
     | StopDrawing({pointer_id}) =>
-      Belt.Map.has(state, pointer_id) ?
-        ReasonReact.Update(Belt.Map.remove(state, pointer_id)) :
+      Belt.Map.has(state.pointers, pointer_id) ?
+        ReasonReact.Update({
+          ...state,
+          pointers: Belt.Map.remove(state.pointers, pointer_id),
+        }) :
         ReasonReact.NoUpdate
     },
   render: self => {
@@ -202,7 +215,7 @@ let make =
     let maybeEmit = (action: graph_action, self) : unit =>
       switch (action) {
       | FinishDrawing({pointer_id, nib_connection: end_nib, isSource}) =>
-        switch (Belt.Map.get(self.ReasonReact.state, pointer_id)) {
+        switch (Belt.Map.get(self.ReasonReact.state.pointers, pointer_id)) {
         | Some(pointer_action) =>
           switch (pointer_action) {
           | DrawingConnection({startIsSource, nib_connection: start_nib}) =>
@@ -294,7 +307,8 @@ let make =
               />
             | _ => ReasonReact.null
             },
-          Belt.Map.keep(self.state, (_, pointer_action: pointer_action) =>
+          Belt.Map.keep(
+            self.state.pointers, (_, pointer_action: pointer_action) =>
             switch (pointer_action) {
             | DrawingConnection(_) => true
             | _ => false

@@ -143,7 +143,10 @@ type graph_action =
   | FinishDrawing(finish_drawing_action)
   | StopDrawing(stop_drawing_action);
 
-type graph_state = pointer_action_map;
+type graph_state = {
+  pointers: pointer_action_map,
+  error: option(string),
+};
 
 type create_connection_action = {
   definition_id,
