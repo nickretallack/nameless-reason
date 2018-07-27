@@ -63,13 +63,41 @@ let make =
         }
       | None => ReasonReact.NoUpdate
       }
-    | FinishDrawing({pointer_id}) =>
-      Belt.Map.has(state.pointers, pointer_id) ?
-        ReasonReact.Update({
-          ...state,
-          pointers: Belt.Map.remove(state.pointers, pointer_id),
-        }) :
-        ReasonReact.NoUpdate
+    | FinishDrawing({pointer_id, nib_connection: end_nib, isSource}) =>
+      switch (Belt.Map.get(state.pointers, pointer_id)) {
+      | Some(pointer_action) =>
+        switch (pointer_action) {
+        | DrawingConnection({startIsSource, nib_connection: start_nib}) =>
+          startIsSource != isSource ?
+            ReasonReact.UpdateWithSideEffects(
+              {
+                error: None,
+                pointers: Belt.Map.remove(state.pointers, pointer_id),
+              },
+              (
+                _ =>
+                  emit(
+                    CreateConnection({
+                      definition_id,
+                      source: startIsSource ? start_nib : end_nib,
+                      sink: startIsSource ? end_nib : start_nib,
+                    }),
+                  )
+              ),
+            ) :
+            ReasonReact.Update({
+              ...state,
+              error:
+                Some(
+                  startIsSource ?
+                    "Can't connect a source to a source" :
+                    "Can't connect a sink to a sink",
+                ),
+            })
+        | _ => ReasonReact.NoUpdate
+        }
+      | None => ReasonReact.NoUpdate
+      }
     | StopDrawing({pointer_id}) =>
       Belt.Map.has(state.pointers, pointer_id) ?
         ReasonReact.Update({
@@ -212,32 +240,8 @@ let make =
       | GraphConnection({nib_id}) => nib_id
       };
 
-    let maybeEmit = (action: graph_action, self) : unit =>
-      switch (action) {
-      | FinishDrawing({pointer_id, nib_connection: end_nib, isSource}) =>
-        switch (Belt.Map.get(self.ReasonReact.state.pointers, pointer_id)) {
-        | Some(pointer_action) =>
-          switch (pointer_action) {
-          | DrawingConnection({startIsSource, nib_connection: start_nib}) =>
-            startIsSource != isSource ?
-              emit(
-                CreateConnection({
-                  definition_id,
-                  source: startIsSource ? start_nib : end_nib,
-                  sink: startIsSource ? end_nib : start_nib,
-                }),
-              ) :
-              ()
-          | _ => ()
-          }
-        | None => ()
-        }
-      | _ => ()
-      };
-    let handleNibAction = (action: graph_action, self) : unit => {
-      maybeEmit(action, self);
+    let handleNibAction = (action: graph_action, self) : unit =>
       self.ReasonReact.send(action);
-    };
 
     let changeName = event =>
       emit(ChangeName({definition_id, name: getEventValue(event)}));
