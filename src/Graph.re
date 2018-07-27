@@ -240,9 +240,6 @@ let make =
       | GraphConnection({nib_id}) => nib_id
       };
 
-    let handleNibAction = (action: graph_action, self) : unit =>
-      self.ReasonReact.send(action);
-
     let changeName = event =>
       emit(ChangeName({definition_id, name: getEventValue(event)}));
 
@@ -349,7 +346,7 @@ let make =
               <Nib
                 isSource=true
                 nib_connection=(GraphConnection({nib_id: nib_id}))
-                emit=(self.handle(handleNibAction))
+                emit=self.send
               />
             </div>,
           documentation.inputNames,
@@ -365,7 +362,7 @@ let make =
               <Nib
                 isSource=false
                 nib_connection=(GraphConnection({nib_id: nib_id}))
-                emit=(self.handle(handleNibAction))
+                emit=self.send
               />
               (ReasonReact.string(name))
             </div>,
@@ -380,7 +377,7 @@ let make =
               node_id
               definition=(getDefinition(node.definition_id))
               position=(Belt.Map.getExn(nodePositions, node_id))
-              emit=(self.handle(handleNibAction))
+              emit=self.send
             />,
           definition.implementation.nodes,
         )
