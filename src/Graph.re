@@ -75,6 +75,7 @@ let make =
                 startIsSource ? end_nib : start_nib,
                 startIsSource ? start_nib : end_nib,
               ),
+              definition.implementation.nodes,
             ) ?
               ReasonReact.Update({
                 ...state,

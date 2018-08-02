@@ -30,32 +30,15 @@ let rec dfs = (connections: connection_map, node_id, seen: node_id_set) : bool =
     Belt.Set.toList(followConnections(connections, node_id)),
   );
 
-let detectCycles = (connections: connection_map) : bool => {
-  Js.log(
-    Belt.Map.has(
-      connections,
-      NodeConnection({node_id: "node1", nib_id: "out1"}),
-    ),
-  );
-  Belt.Set.some(
-    Belt.Map.reduce(
-      connections,
-      Belt.Set.make(~id=(module NodeComparator)),
-      (acc: node_id_set, sink, source) =>
-      switch (sink) {
-      | GraphConnection(_) =>
-        switch (source) {
-        | NodeConnection({node_id}) => Belt.Set.add(acc, node_id)
-        | _ => acc
-        }
-      | _ => acc
-      }
-    ),
+let detectCycles =
+    (connections: connection_map, nodes: node_map(node_implementation))
+    : bool =>
+  List.exists(
     (node_id: node_id) =>
-    dfs(
-      connections,
-      node_id,
-      Belt.Set.add(Belt.Set.make(~id=(module NodeComparator)), node_id),
-    )
+      dfs(
+        connections,
+        node_id,
+        Belt.Set.add(Belt.Set.make(~id=(module NodeComparator)), node_id),
+      ),
+    Array.to_list(Belt.Map.keysToArray(nodes)),
   );
-};
