@@ -1,24 +1,27 @@
 open Types;
 
+let isRootNode = (node_id, connections) =>
+  !
+    Belt.Map.some(connections, (sink, source) =>
+      switch (source) {
+      | GraphConnection(_) => false
+      | NodeConnection(connection) =>
+        if (connection.node_id == node_id) {
+          switch (sink) {
+          | NodeConnection(_connection) => true
+          | GraphConnection(_connection) => false
+          };
+        } else {
+          false;
+        }
+      }
+    );
+
 let rec topoSort =
         (nodes: node_map(node_implementation), connections: connection_map) => {
   let (availableNodes, unavailableNodes) =
     Belt.Map.partition(nodes, (node_id, _node) =>
-      !
-        Belt.Map.some(connections, (sink, source) =>
-          switch (source) {
-          | GraphConnection(_connection) => false
-          | NodeConnection(connection) =>
-            if (connection.node_id == node_id) {
-              switch (sink) {
-              | NodeConnection(_connection) => true
-              | GraphConnection(_connection) => false
-              };
-            } else {
-              false;
-            }
-          }
-        )
+      isRootNode(node_id, connections)
     );
   let remainingConnections =
     Belt.Map.keep(connections, (sink, _source) =>
