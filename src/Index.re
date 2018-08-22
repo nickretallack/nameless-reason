@@ -49,29 +49,87 @@ let example_implementation = {
     ),
 };
 
-let graph_definition = {
-  documentation:
-    Belt.Map.fromArray(
-      [|("en", example_documentation)|],
-      ~id=(module LanguageComparator),
-    ),
-  implementation: example_implementation,
-  display: {
-    inputOrder: ["in1", "in2"],
-    outputOrder: ["out1", "out2"],
-  },
-};
+let example =
+  Graph({
+    documentation:
+      Belt.Map.fromArray(
+        [|("en", example_documentation)|],
+        ~id=(module LanguageComparator),
+      ),
+    implementation: example_implementation,
+    display: {
+      inputOrder: ["in1", "in2"],
+      outputOrder: ["out1", "out2"],
+    },
+  });
 
-let definition = Graph(graph_definition);
+let simple =
+  Graph({
+    documentation:
+      Belt.Map.fromArray(
+        [|
+          (
+            "en",
+            {
+              name: "Simple Definition",
+              description: "A simple function",
+              inputNames:
+                Belt.Map.fromArray(
+                  [|("in1", "In 1"), ("in2", "In 2")|],
+                  ~id=(module NibComparator),
+                ),
+              outputNames:
+                Belt.Map.fromArray(
+                  [|("out1", "Out 1"), ("out2", "Out 2")|],
+                  ~id=(module NibComparator),
+                ),
+            },
+          ),
+        |],
+        ~id=(module LanguageComparator),
+      ),
+    implementation: {
+      nodes:
+        Belt.Map.fromArray(
+          [|("node1", {definition_id: "one", node_type: Call})|],
+          ~id=(module NodeComparator),
+        ),
+      connections:
+        Belt.Map.fromArray(
+          [|
+            (
+              GraphConnection({nib_id: "out1"}),
+              NodeConnection({node_id: "node1", nib_id: "value"}),
+            ),
+          |],
+          ~id=(module ConnectionComparator),
+        ),
+    },
+    display: {
+      inputOrder: ["in1", "in2"],
+      outputOrder: ["out1", "out2"],
+    },
+  });
+
+let one =
+  Constant({
+    documentation:
+      Belt.Map.fromArray(
+        [|("en", {name: "", description: ""})|],
+        ~id=(module LanguageComparator),
+      ),
+    value: "1",
+  });
+
 let definitions =
   Belt.Map.fromArray(
-    [|("example", definition)|],
+    [|("example", example), ("simple", simple), ("one", one)|],
     ~id=(module DefinitionComparator),
   );
 
 ReactDOMRe.renderToElementWithId(
   <WindowSize
-    render=(size => <App definitions size definition_id="example" />)
+    render=(size => <App definitions size definition_id="simple" />)
   />,
   "graph",
 );

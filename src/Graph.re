@@ -123,7 +123,7 @@ let make =
       Belt.Map.getExn(definitions, definition_id);
     let getNode = node_id =>
       Belt.Map.getExn(definition.implementation.nodes, node_id);
-    let documentation = getDocumentation(definition);
+    let documentation = Belt.Map.getExn(definition.documentation, "en");
     let columns: list(node_map(node_implementation)) =
       TopoSort.topoSort(
         definition.implementation.nodes,
@@ -133,19 +133,18 @@ let make =
     let nodeWidth = 80;
     let textHeight = 20;
 
-    let nodeHeight = (node: node_implementation) => {
-      let definition =
-        switch (getDefinition(node.definition_id)) {
-        | Graph(definition) => definition
-        };
-      let documentation = getDocumentation(definition);
-      (
-        Belt.Map.size(documentation.inputNames)
-        + Belt.Map.size(documentation.outputNames)
-        + 1
-      )
-      * textHeight;
-    };
+    let nodeHeight = (node: node_implementation) =>
+      switch (getDefinition(node.definition_id)) {
+      | Graph(definition) =>
+        let documentation = Belt.Map.getExn(definition.documentation, "en");
+        (
+          Belt.Map.size(documentation.inputNames)
+          + Belt.Map.size(documentation.outputNames)
+          + 1
+        )
+        * textHeight;
+      | Constant(_) => 1
+      };
     let nodePositions: node_map(point) =
       Belt.Map.mergeMany(
         Belt.Map.make(~id=(module NodeComparator)),
@@ -218,6 +217,7 @@ let make =
                     indexOf(nib_id, display.outputOrder)
                     + List.length(display.inputOrder);
                   }
+                | Constant(_) => (-1)
                 }
               )
               + 1
@@ -241,6 +241,7 @@ let make =
         let definition = getDefinition(node.definition_id);
         switch (definition) {
         | Graph({display}) => indexOf(nib_id, display.outputOrder)
+        | Constant(_) => 0
         };
       | GraphConnection({nib_id}) =>
         indexOf(nib_id, definition.display.inputOrder)

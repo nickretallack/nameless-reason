@@ -72,6 +72,15 @@ type function_documentation = {
   outputNames: nib_map(string),
 };
 
+type constant_documentation = {
+  name: string,
+  description: string,
+};
+
+type documentation =
+  | FunctionDocumentation(function_documentation)
+  | ConstantDocumentation(constant_documentation);
+
 type function_display = {
   inputOrder: list(nib_id),
   outputOrder: list(nib_id),
@@ -83,9 +92,15 @@ type graph_definition = {
   display: function_display,
 };
 
+type constant_definition = {
+  documentation: language_map(constant_documentation),
+  value: string,
+};
+
 /* TODO: more types of definitions */
 type definition =
-  | Graph(graph_definition);
+  | Graph(graph_definition)
+  | Constant(constant_definition);
 
 module DefinitionComparator =
   Belt.Id.MakeComparable({
