@@ -1,6 +1,6 @@
 [%%debugger.chrome];
-open Types;
 open ActionTypes;
+open Types;
 open Utils;
 open Evaluate;
 
@@ -135,16 +135,20 @@ let make =
     let nodeWidth = 80;
     let textHeight = 20;
 
+    let countNibs = documentation => {
+      let languageDocumentation = Belt.Map.getExn(documentation, "en");
+      (
+        Belt.Map.size(languageDocumentation.inputNames)
+        + Belt.Map.size(languageDocumentation.outputNames)
+        + 1
+      )
+      * textHeight;
+    };
+
     let nodeHeight = (node: node_implementation) =>
       switch (getDefinition(node.definition_id)) {
-      | Graph(definition) =>
-        let documentation = Belt.Map.getExn(definition.documentation, "en");
-        (
-          Belt.Map.size(documentation.inputNames)
-          + Belt.Map.size(documentation.outputNames)
-          + 1
-        )
-        * textHeight;
+      | Graph({documentation}) => countNibs(documentation)
+      | Code({documentation}) => countNibs(documentation)
       | Constant(_) => 1
       };
     let nodePositions: node_map(point) =
@@ -200,6 +204,13 @@ let make =
     let inputPositions = nibPositions(definition.display.inputOrder, true);
     let outputPositions = nibPositions(definition.display.outputOrder, false);
 
+    let getNibIndex = (display, nib_id, isSink) =>
+      if (isSink) {
+        indexOf(nib_id, display.inputOrder);
+      } else {
+        indexOf(nib_id, display.outputOrder)
+        + List.length(display.inputOrder);
+      };
     let getNibPosition = (nib_connection, isSink) =>
       switch (nib_connection) {
       | NodeConnection({node_id, nib_id}) =>
@@ -212,13 +223,8 @@ let make =
             (
               (
                 switch (definition) {
-                | Graph({display}) =>
-                  if (isSink) {
-                    indexOf(nib_id, display.inputOrder);
-                  } else {
-                    indexOf(nib_id, display.outputOrder)
-                    + List.length(display.inputOrder);
-                  }
+                | Graph({display}) => getNibIndex(display, nib_id, isSink)
+                | Code({display}) => getNibIndex(display, nib_id, isSink)
                 | Constant(_) => (-1)
                 }
               )
@@ -243,6 +249,7 @@ let make =
         let definition = getDefinition(node.definition_id);
         switch (definition) {
         | Graph({display}) => indexOf(nib_id, display.outputOrder)
+        | Code({display}) => indexOf(nib_id, display.outputOrder)
         | Constant(_) => 0
         };
       | GraphConnection({nib_id}) =>

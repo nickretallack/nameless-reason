@@ -91,7 +91,11 @@ let simple =
     implementation: {
       nodes:
         Belt.Map.fromArray(
-          [|("node1", {definition_id: "one", node_type: Call})|],
+          [|
+            ("node1", {definition_id: "one", node_type: Call}),
+            ("node2", {definition_id: "one", node_type: Call}),
+            ("node3", {definition_id: "plus", node_type: Call}),
+          |],
           ~id=(module NodeComparator),
         ),
       connections:
@@ -99,7 +103,15 @@ let simple =
           [|
             (
               GraphConnection({nib_id: "out1"}),
+              NodeConnection({node_id: "node3", nib_id: "result"}),
+            ),
+            (
+              NodeConnection({node_id: "node3", nib_id: "left"}),
               NodeConnection({node_id: "node1", nib_id: "value"}),
+            ),
+            (
+              NodeConnection({node_id: "node3", nib_id: "right"}),
+              NodeConnection({node_id: "node2", nib_id: "value"}),
             ),
           |],
           ~id=(module ConnectionComparator),
@@ -121,9 +133,50 @@ let one =
     value: "1",
   });
 
+let plus =
+  Code({
+    documentation:
+      Belt.Map.fromArray(
+        [|
+          (
+            "en",
+            {
+              name: "+",
+              description: "Addition",
+              inputNames:
+                Belt.Map.fromArray(
+                  [|("left", "Left"), ("right", "Right")|],
+                  ~id=(module NibComparator),
+                ),
+              outputNames:
+                Belt.Map.fromArray(
+                  [|("result", "Result")|],
+                  ~id=(module NibComparator),
+                ),
+            },
+          ),
+        |],
+        ~id=(module LanguageComparator),
+      ),
+    implementation:
+      Belt.Map.fromArray(
+        [|(JavaScript, "function(left, right){return left + right}")|],
+        ~id=(module ProgrammingLanguageComparator),
+      ),
+    display: {
+      inputOrder: ["left", "right"],
+      outputOrder: ["result"],
+    },
+  });
+
 let definitions =
   Belt.Map.fromArray(
-    [|("example", example), ("simple", simple), ("one", one)|],
+    [|
+      ("example", example),
+      ("simple", simple),
+      ("one", one),
+      ("plus", plus),
+    |],
     ~id=(module DefinitionComparator),
   );
 

@@ -65,6 +65,21 @@ type graph_implementation = {
   nodes: node_map(node_implementation),
 };
 
+type programmingLanguage =
+  | JavaScript;
+
+module ProgrammingLanguageComparator =
+  Belt.Id.MakeComparable({
+    type t = programmingLanguage;
+    let cmp = compare;
+  });
+type programmingLanguageMap =
+  Belt.Map.t(
+    programmingLanguage,
+    string,
+    ProgrammingLanguageComparator.identity,
+  );
+
 type function_documentation = {
   name: string,
   description: string,
@@ -92,6 +107,12 @@ type graph_definition = {
   display: function_display,
 };
 
+type code_definition = {
+  documentation: language_map(function_documentation),
+  implementation: programmingLanguageMap,
+  display: function_display,
+};
+
 type constant_definition = {
   documentation: language_map(constant_documentation),
   value: string,
@@ -100,6 +121,7 @@ type constant_definition = {
 /* TODO: more types of definitions */
 type definition =
   | Graph(graph_definition)
+  | Code(code_definition)
   | Constant(constant_definition);
 
 module DefinitionComparator =

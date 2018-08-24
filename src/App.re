@@ -31,22 +31,56 @@ let make = (~size, ~definitions, ~definition_id, _children) => {
             }),
           ),
         )
+      | _ => ReasonReact.NoUpdate /* TODO: Error? */
       };
     | ChangeName({definition_id, name}) =>
       let definition = Belt.Map.getExn(state, definition_id);
       switch (definition) {
-      | Graph(graph_definition) =>
-        let documentation =
-          Belt.Map.getExn(graph_definition.documentation, "en");
+      | Graph(definition) =>
+        let documentation = Belt.Map.getExn(definition.documentation, "en");
         ReasonReact.Update(
           Belt.Map.set(
             state,
             definition_id,
             Graph({
-              ...graph_definition,
+              ...definition,
               documentation:
                 Belt.Map.set(
-                  graph_definition.documentation,
+                  definition.documentation,
+                  "en",
+                  {...documentation, name},
+                ),
+            }),
+          ),
+        );
+      | Constant(definition) =>
+        let documentation = Belt.Map.getExn(definition.documentation, "en");
+        ReasonReact.Update(
+          Belt.Map.set(
+            state,
+            definition_id,
+            Constant({
+              ...definition,
+              documentation:
+                Belt.Map.set(
+                  definition.documentation,
+                  "en",
+                  {...documentation, name},
+                ),
+            }),
+          ),
+        );
+      | Code(definition) =>
+        let documentation = Belt.Map.getExn(definition.documentation, "en");
+        ReasonReact.Update(
+          Belt.Map.set(
+            state,
+            definition_id,
+            Code({
+              ...definition,
+              documentation:
+                Belt.Map.set(
+                  definition.documentation,
                   "en",
                   {...documentation, name},
                 ),

@@ -15,7 +15,27 @@ let make =
   render: _self =>
     switch (definition) {
     | Graph(graph_definition) =>
-      <GraphNode definition=graph_definition node_id position emit />
+      let documentation =
+        Belt.Map.getExn(graph_definition.documentation, "en");
+      <GenericNode
+        node_id
+        position
+        emit
+        name=documentation.name
+        inputs=documentation.inputNames
+        outputs=documentation.outputNames
+      />;
+    | Code(code_definition) =>
+      let documentation =
+        Belt.Map.getExn(code_definition.documentation, "en");
+      <GenericNode
+        node_id
+        position
+        emit
+        name=documentation.name
+        inputs=documentation.inputNames
+        outputs=documentation.outputNames
+      />;
     | Constant(constant_definition) =>
       <ConstantNode definition=constant_definition node_id position emit />
     },
