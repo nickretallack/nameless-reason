@@ -10,7 +10,7 @@ let make =
       ~inputs: nib_map(string),
       ~outputs: nib_map(string),
       ~position: point,
-      ~emit: graph_action => unit,
+      ~emit: ActionTypes.graph_action => unit,
       _children,
     ) => {
   ...component,

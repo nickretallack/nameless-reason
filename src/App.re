@@ -1,5 +1,7 @@
 [%%debugger.chrome];
 open Types;
+open ActionTypes;
+
 let component = ReasonReact.reducerComponent("App");
 
 let make = (~size, ~definitions, ~definition_id, _children) => {

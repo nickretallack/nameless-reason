@@ -1,5 +1,6 @@
 [%%debugger.chrome];
 open Types;
+open ActionTypes;
 open Utils;
 
 type react_ref = ref(option(ReasonReact.reactRef));
