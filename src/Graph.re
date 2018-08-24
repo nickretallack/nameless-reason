@@ -1,6 +1,7 @@
 [%%debugger.chrome];
 open Types;
 open Utils;
+open Evaluate;
 
 let document = Webapi.Dom.Document.asEventTarget(Webapi.Dom.document);
 let preventDefault = event => EventRe.preventDefault(event);
@@ -256,6 +257,8 @@ let make =
     let changeName = event =>
       emit(ChangeName({definition_id, name: getEventValue(event)}));
 
+    let evaluate = output_id =>
+      Js.log(evaluateOutput(definitions, definition_id, output_id));
     <div
       className="graph"
       onMouseMove=(
@@ -378,6 +381,9 @@ let make =
                 emit=self.send
               />
               (ReasonReact.string(name))
+              <a className="evaluate" onClick=(_ => evaluate(nib_id))>
+                (ReasonReact.string("evaluate"))
+              </a>
             </div>,
           documentation.outputNames,
         )

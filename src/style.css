@@ -13,6 +13,12 @@ body {
   height: 100vh;
 }
 
+.evaluate {
+  display: block;
+  color: blue;
+  cursor: pointer;
+}
+
 .node {
   position: absolute;
   width: 80px;
