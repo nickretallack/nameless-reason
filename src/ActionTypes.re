@@ -54,6 +54,10 @@ type change_name_action = {
 
 type app_action =
   | CreateConnection(create_connection_action)
-  | ChangeName(change_name_action);
+  | ChangeName(change_name_action)
+  | ChangeRoute(ReasonReact.Router.url);
 
-type app_state = definition_map;
+type app_state = {
+  definitions: definition_map,
+  definition_id,
+};

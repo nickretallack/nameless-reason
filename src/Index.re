@@ -181,8 +181,6 @@ let definitions =
   );
 
 ReactDOMRe.renderToElementWithId(
-  <WindowSize
-    render=(size => <App definitions size definition_id="simple" />)
-  />,
+  <WindowSize render=(size => <App definitions size />) />,
   "graph",
 );
