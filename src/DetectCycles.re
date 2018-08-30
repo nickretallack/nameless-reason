@@ -31,7 +31,7 @@ let rec dfs = (connections: connection_map, node_id, seen: node_id_set) : bool =
   );
 
 let detectCycles =
-    (connections: connection_map, nodes: node_map(node_implementation))
+    (connections: connection_map, nodes: node_map(node))
     : bool =>
   List.exists(
     (node_id: node_id) =>

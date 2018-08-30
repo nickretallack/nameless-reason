@@ -6,7 +6,7 @@ let component = ReasonReact.statelessComponent("Node");
 let make =
     (
       ~node_id: node_id,
-      ~name=?,
+      ~name: option(string)=?,
       ~inputs: nib_map(string),
       ~outputs: nib_map(string),
       ~position: point,

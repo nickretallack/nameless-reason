@@ -43,14 +43,15 @@ type nib_connection =
   | NodeConnection(node_connection)
   | GraphConnection(graph_connection);
 
-type node_type =
-  | Call
-  | Value;
-
-type node_implementation = {
-  definition_id,
-  node_type,
-};
+type node =
+  /* | Literal(string) */
+  | Reference(string)
+  | Call(definition_id)
+  | Value(definition_id)
+  | Lambda(definition_id)
+  | PointerCall(definition_id)
+  | ShapeConstruct(definition_id)
+  | ShapeDestructure(definition_id);
 
 module ConnectionComparator =
   Belt.Id.MakeComparable({
@@ -62,7 +63,7 @@ type connection_map =
 
 type graph_implementation = {
   connections: connection_map,
-  nodes: node_map(node_implementation),
+  nodes: node_map(node),
 };
 
 type programmingLanguage =
@@ -80,6 +81,11 @@ type programmingLanguageMap =
     ProgrammingLanguageComparator.identity,
   );
 
+type basic_documentation = {
+  name: string,
+  description: string,
+};
+
 type function_documentation = {
   name: string,
   description: string,
@@ -87,19 +93,18 @@ type function_documentation = {
   outputNames: nib_map(string),
 };
 
-type constant_documentation = {
+type shape_documentation = {
   name: string,
   description: string,
+  fieldNames: nib_map(string),
 };
-
-type documentation =
-  | FunctionDocumentation(function_documentation)
-  | ConstantDocumentation(constant_documentation);
 
 type function_display = {
   inputOrder: list(nib_id),
   outputOrder: list(nib_id),
 };
+
+type shape_display = {fieldOrder: list(nib_id)};
 
 type graph_definition = {
   documentation: language_map(function_documentation),
@@ -114,15 +119,32 @@ type code_definition = {
 };
 
 type constant_definition = {
-  documentation: language_map(constant_documentation),
+  documentation: language_map(basic_documentation),
   value: string,
+};
+
+type reference_definition = {
+  documentation: language_map(basic_documentation),
+};
+
+type interface_definition = {
+  documentation: language_map(function_documentation),
+  display: function_display,
+};
+
+type shape_definition = {
+  documentation: language_map(shape_documentation),
+  display: shape_display,
 };
 
 /* TODO: more types of definitions */
 type definition =
   | Graph(graph_definition)
   | Code(code_definition)
-  | Constant(constant_definition);
+  | Constant(constant_definition)
+  | Reference(reference_definition)
+  | Interface(interface_definition)
+  | Shape(shape_definition);
 
 module DefinitionComparator =
   Belt.Id.MakeComparable({

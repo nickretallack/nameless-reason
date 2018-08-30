@@ -17,8 +17,7 @@ let isRootNode = (node_id, connections) =>
       }
     );
 
-let rec topoSort =
-        (nodes: node_map(node_implementation), connections: connection_map) => {
+let rec topoSort = (nodes: node_map(node), connections: connection_map) => {
   let (availableNodes, unavailableNodes) =
     Belt.Map.partition(nodes, (node_id, _node) =>
       isRootNode(node_id, connections)

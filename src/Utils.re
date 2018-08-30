@@ -66,3 +66,122 @@ external dispatchCustomEvent : Dom.customEvent => bool = "dispatchEvent";
 let getEventValue = event => ReactDOMRe.domElementToObj(
                                ReactEventRe.Form.target(event),
                              )##value;
+
+let makeNibMap = items =>
+  Belt.Map.fromArray(items, ~id=(module NibComparator));
+
+let getName = (definition: definition) : string =>
+  switch (definition) {
+  | Graph({documentation})
+  | Code({documentation})
+  | Interface({documentation}) => Belt.Map.getExn(documentation, "en").name
+  | Constant({documentation}) => Belt.Map.getExn(documentation, "en").name
+  | Shape({documentation}) => Belt.Map.getExn(documentation, "en").name
+  | _ => raise(Not_found)
+  };
+
+let getInputs = (definition: definition) =>
+  switch (definition) {
+  | Graph({documentation})
+  | Code({documentation})
+  | Interface({documentation}) =>
+    Belt.Map.getExn(documentation, "en").inputNames
+  | Constant(_) => makeNibMap([||])
+  | _ => raise(Not_found)
+  };
+
+let getOutputs = (definition: definition) =>
+  switch (definition) {
+  | Graph({documentation})
+  | Code({documentation})
+  | Interface({documentation}) =>
+    Belt.Map.getExn(documentation, "en").outputNames
+  | Constant({documentation}) =>
+    makeNibMap([|("value", Belt.Map.getExn(documentation, "en").name)|])
+  | _ => raise(Not_found)
+  };
+
+let getNibIndex =
+    (node: node, nib_id: nib_id, isSink: bool, definitions: definition_map) =>
+  switch (node) {
+  | Value(_) => (-1)
+  | ShapeConstruct(definition_id) =>
+    switch (Belt.Map.getExn(definitions, definition_id)) {
+    | Shape({display}) =>
+      if (isSink) {
+        indexOf(nib_id, display.fieldOrder);
+      } else {
+        List.length(display.fieldOrder);
+      }
+    | _ => raise(Not_found)
+    }
+  | ShapeDestructure(definition_id) =>
+    switch (Belt.Map.getExn(definitions, definition_id)) {
+    | Shape({display}) =>
+      if (isSink) {
+        0;
+      } else {
+        indexOf(nib_id, display.fieldOrder) + 1;
+      }
+    | _ => raise(Not_found)
+    }
+  | Call(definition_id) =>
+    switch (Belt.Map.getExn(definitions, definition_id)) {
+    | Graph({display})
+    | Code({display}) =>
+      if (isSink) {
+        indexOf(nib_id, display.inputOrder);
+      } else {
+        indexOf(nib_id, display.outputOrder)
+        + List.length(display.inputOrder);
+      }
+    }
+  };
+
+let getOutputIndex = (node: node, nib_id: nib_id, definitions: definition_map) =>
+  switch (node) {
+  | Value(_)
+  | ShapeConstruct(_) => 0
+  | ShapeDestructure(definition_id) =>
+    let definition = Belt.Map.getExn(definitions, definition_id);
+    switch (definition) {
+    | Shape({display}) => indexOf(nib_id, display.fieldOrder)
+    | _ => raise(Not_found)
+    };
+  | Call(definition_id) =>
+    let definition = Belt.Map.getExn(definitions, definition_id);
+    switch (definition) {
+    | Graph({display})
+    | Code({display}) => indexOf(nib_id, display.outputOrder)
+    };
+  };
+
+let makeGraph = (~name, ~description, ~inputs, ~outputs, ~nodes, ~connections) =>
+  Graph({
+    documentation:
+      Belt.Map.fromArray(
+        [|
+          (
+            "en",
+            {
+              name,
+              description,
+              inputNames:
+                Belt.Map.fromArray(inputs, ~id=(module NibComparator)),
+              outputNames:
+                Belt.Map.fromArray(outputs, ~id=(module NibComparator)),
+            },
+          ),
+        |],
+        ~id=(module LanguageComparator),
+      ),
+    display: {
+      inputOrder: Array.to_list(Array.map(((id, _name)) => id, inputs)),
+      outputOrder: Array.to_list(Array.map(((id, _name)) => id, outputs)),
+    },
+    implementation: {
+      nodes: Belt.Map.fromArray(nodes, ~id=(module NodeComparator)),
+      connections:
+        Belt.Map.fromArray(connections, ~id=(module ConnectionComparator)),
+    },
+  });

@@ -6,7 +6,7 @@ let component = ReasonReact.reducerComponent("App");
 
 let make = (~size, ~definitions, _children) => {
   ...component,
-  initialState: () => {definitions, definition_id: "example"},
+  initialState: () => {definitions, definition_id: "point-example"},
   subscriptions: self => [
     Sub(
       () => ReasonReact.Router.watchUrl(url => self.send(ChangeRoute(url))),
@@ -127,6 +127,7 @@ let make = (~size, ~definitions, _children) => {
         />
       | Constant(_) => ReasonReact.string("A Constant")
       | Code(_) => ReasonReact.string("Some Code")
+      | Shape(_) => ReasonReact.string("A shape")
       }
     },
 };

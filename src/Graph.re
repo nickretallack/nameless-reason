@@ -121,12 +121,10 @@ let make =
         ReasonReact.NoUpdate
     },
   render: self => {
-    let getDefinition = (definition_id: definition_id) : definition =>
-      Belt.Map.getExn(definitions, definition_id);
     let getNode = node_id =>
       Belt.Map.getExn(definition.implementation.nodes, node_id);
     let documentation = Belt.Map.getExn(definition.documentation, "en");
-    let columns: list(node_map(node_implementation)) =
+    let columns: list(node_map(node)) =
       TopoSort.topoSort(
         definition.implementation.nodes,
         definition.implementation.connections,
@@ -135,32 +133,44 @@ let make =
     let nodeWidth = 80;
     let textHeight = 20;
 
-    let countNibs = documentation => {
-      let languageDocumentation = Belt.Map.getExn(documentation, "en");
-      (
-        Belt.Map.size(languageDocumentation.inputNames)
-        + Belt.Map.size(languageDocumentation.outputNames)
-        + 1
-      )
-      * textHeight;
-    };
-
-    let nodeHeight = (node: node_implementation) =>
-      switch (getDefinition(node.definition_id)) {
-      | Graph({documentation}) => countNibs(documentation)
-      | Code({documentation}) => countNibs(documentation)
-      | Constant(_) => 1
-      };
+    let nodeHeight = (node: node) =>
+      textHeight
+      * (
+        1
+        + (
+          switch (node) {
+          | Value(_) => 0
+          | ShapeConstruct(definition_id)
+          | ShapeDestructure(definition_id) =>
+            switch (Belt.Map.getExn(definitions, definition_id)) {
+            | Shape({documentation}) =>
+              let languageDocumentation =
+                Belt.Map.getExn(documentation, "en");
+              Belt.Map.size(languageDocumentation.fieldNames);
+            | _ => raise(Not_found)
+            }
+          | Call(definition_id) =>
+            switch (Belt.Map.getExn(definitions, definition_id)) {
+            | Graph({documentation})
+            | Code({documentation}) =>
+              let languageDocumentation =
+                Belt.Map.getExn(documentation, "en");
+              Belt.Map.size(languageDocumentation.inputNames)
+              + Belt.Map.size(languageDocumentation.outputNames);
+            }
+          }
+        )
+      );
     let nodePositions: node_map(point) =
       Belt.Map.mergeMany(
         Belt.Map.make(~id=(module NodeComparator)),
         Array.of_list(
           List.flatten(
             List.mapi(
-              (column, nodes: node_map(node_implementation)) => {
+              (column, nodes: node_map(node)) => {
                 let rowHeight = size.y / (Belt.Map.size(nodes) + 1);
                 List.mapi(
-                  (row, (node_id, node: node_implementation)) => (
+                  (row, (node_id, node: node)) => (
                     node_id,
                     {
                       x: columnWidth * (column + 1) - nodeWidth / 2,
@@ -204,32 +214,15 @@ let make =
     let inputPositions = nibPositions(definition.display.inputOrder, true);
     let outputPositions = nibPositions(definition.display.outputOrder, false);
 
-    let getNibIndex = (display, nib_id, isSink) =>
-      if (isSink) {
-        indexOf(nib_id, display.inputOrder);
-      } else {
-        indexOf(nib_id, display.outputOrder)
-        + List.length(display.inputOrder);
-      };
     let getNibPosition = (nib_connection, isSink) =>
       switch (nib_connection) {
       | NodeConnection({node_id, nib_id}) =>
         let nodePosition = getNodePosition(node_id);
         let node = getNode(node_id);
-        let definition = getDefinition(node.definition_id);
         {
           x: nodePosition.x + (if (isSink) {80} else {0}),
           y:
-            (
-              (
-                switch (definition) {
-                | Graph({display}) => getNibIndex(display, nib_id, isSink)
-                | Code({display}) => getNibIndex(display, nib_id, isSink)
-                | Constant(_) => (-1)
-                }
-              )
-              + 1
-            )
+            (getNibIndex(node, nib_id, isSink, definitions) + 1)
             * textHeight
             + textHeight
             / 2
@@ -246,12 +239,7 @@ let make =
       switch (source) {
       | NodeConnection({node_id, nib_id}) =>
         let node = getNode(node_id);
-        let definition = getDefinition(node.definition_id);
-        switch (definition) {
-        | Graph({display}) => indexOf(nib_id, display.outputOrder)
-        | Code({display}) => indexOf(nib_id, display.outputOrder)
-        | Constant(_) => 0
-        };
+        getOutputIndex(node, nib_id, definitions);
       | GraphConnection({nib_id}) =>
         indexOf(nib_id, definition.display.inputOrder)
       };
@@ -265,8 +253,8 @@ let make =
     let changeName = event =>
       emit(ChangeName({definition_id, name: getEventValue(event)}));
 
-    let evaluate = output_id =>
-      Js.log(evaluateOutput(definitions, definition_id, output_id));
+    /* let evaluate = output_id =>
+       Js.log(evaluateOutput(definitions, definition_id, output_id)); */
     <div
       className="graph"
       onMouseMove=(
@@ -389,20 +377,21 @@ let make =
                 emit=self.send
               />
               (ReasonReact.string(name))
-              <a className="evaluate" onClick=(_ => evaluate(nib_id))>
-                (ReasonReact.string("evaluate"))
-              </a>
             </div>,
+          /* <a className="evaluate" onClick=(_ => evaluate(nib_id))>
+               (ReasonReact.string("evaluate"))
+             </a> */
           documentation.outputNames,
         )
       )
       (
         renderMap(
-          ((node_id: node_id, node: node_implementation)) =>
+          ((node_id: node_id, node: node)) =>
             <Node
               key=node_id
               node_id
-              definition=(getDefinition(node.definition_id))
+              definitions
+              node
               position=(Belt.Map.getExn(nodePositions, node_id))
               emit=self.send
             />,
