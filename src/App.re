@@ -6,13 +6,15 @@ let component = ReasonReact.reducerComponent("App");
 
 let make = (~size, ~definitions, _children) => {
   ...component,
-  initialState: () => {definitions, definition_id: "point-example"},
-  subscriptions: self => [
-    Sub(
-      () => ReasonReact.Router.watchUrl(url => self.send(ChangeRoute(url))),
-      ReasonReact.Router.unwatchUrl,
-    ),
-  ],
+  initialState: () => {
+    definitions,
+    definition_id: ReasonReact.Router.dangerouslyGetInitialUrl().hash,
+  },
+  didMount: self => {
+    let watcherId =
+      ReasonReact.Router.watchUrl(url => self.send(ChangeRoute(url)));
+    self.onUnmount(() => ReasonReact.Router.unwatchUrl(watcherId));
+  },
   reducer: (action: app_action, state: app_state) =>
     switch (action) {
     | ChangeRoute(url) =>
