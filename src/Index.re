@@ -195,6 +195,21 @@ let pointExample =
     |],
   );
 
+let referenceExample =
+  makeGraph(
+    ~name="Reference example",
+    ~description="",
+    ~inputs=[||],
+    ~outputs=[|("reference", "Reference")|],
+    ~nodes=[|("reference", Reference("Game State"))|],
+    ~connections=[|
+      (
+        GraphConnection({nib_id: "reference"}),
+        NodeConnection({node_id: "reference", nib_id: "value"}),
+      ),
+    |],
+  );
+
 let definitions =
   Belt.Map.fromArray(
     [|
@@ -204,6 +219,7 @@ let definitions =
       ("plus", plus),
       ("point", point),
       ("point-example", pointExample),
+      ("reference-example", referenceExample),
     |],
     ~id=(module DefinitionComparator),
   );
