@@ -33,64 +33,31 @@ let example =
   );
 
 let simple =
-  Graph({
-    documentation:
-      Belt.Map.fromArray(
-        [|
-          (
-            "en",
-            {
-              name: "Simple Definition",
-              description: "A simple function",
-              inputNames:
-                Belt.Map.fromArray(
-                  [|("in1", "In 1"), ("in2", "In 2")|],
-                  ~id=(module NibComparator),
-                ),
-              outputNames:
-                Belt.Map.fromArray(
-                  [|("out1", "Out 1"), ("out2", "Out 2")|],
-                  ~id=(module NibComparator),
-                ),
-            },
-          ),
-        |],
-        ~id=(module LanguageComparator),
+  makeGraph(
+    ~name="Simple Definition",
+    ~description="A simple function",
+    ~inputs=[|("in1", "In 1"), ("in2", "In 2")|],
+    ~outputs=[|("out1", "Out 1"), ("out2", "Out 2")|],
+    ~nodes=[|
+      ("node1", Value("one")),
+      ("node2", Value("one")),
+      ("node3", Call("plus")),
+    |],
+    ~connections=[|
+      (
+        GraphConnection({nib_id: "out1"}),
+        NodeConnection({node_id: "node3", nib_id: "result"}),
       ),
-    implementation: {
-      nodes:
-        Belt.Map.fromArray(
-          [|
-            ("node1", Call("one")),
-            ("node2", Call("one")),
-            ("node3", Call("plus")),
-          |],
-          ~id=(module NodeComparator),
-        ),
-      connections:
-        Belt.Map.fromArray(
-          [|
-            (
-              GraphConnection({nib_id: "out1"}),
-              NodeConnection({node_id: "node3", nib_id: "result"}),
-            ),
-            (
-              NodeConnection({node_id: "node3", nib_id: "left"}),
-              NodeConnection({node_id: "node1", nib_id: "value"}),
-            ),
-            (
-              NodeConnection({node_id: "node3", nib_id: "right"}),
-              NodeConnection({node_id: "node2", nib_id: "value"}),
-            ),
-          |],
-          ~id=(module ConnectionComparator),
-        ),
-    },
-    display: {
-      inputOrder: ["in1", "in2"],
-      outputOrder: ["out1", "out2"],
-    },
-  });
+      (
+        NodeConnection({node_id: "node3", nib_id: "left"}),
+        NodeConnection({node_id: "node1", nib_id: "value"}),
+      ),
+      (
+        NodeConnection({node_id: "node3", nib_id: "right"}),
+        NodeConnection({node_id: "node2", nib_id: "value"}),
+      ),
+    |],
+  );
 
 let one =
   Constant({
