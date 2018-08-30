@@ -139,7 +139,8 @@ let make =
         1
         + (
           switch (node) {
-          | Value(_) => 0
+          | Value(_)
+          | Reference(_) => 0
           | ShapeConstruct(definition_id)
           | ShapeDestructure(definition_id) =>
             switch (Belt.Map.getExn(definitions, definition_id)) {
@@ -157,6 +158,18 @@ let make =
                 Belt.Map.getExn(documentation, "en");
               Belt.Map.size(languageDocumentation.inputNames)
               + Belt.Map.size(languageDocumentation.outputNames);
+            | _ => raise(Not_found)
+            }
+          | Lambda(_) => 1
+          | PointerCall(definition_id) =>
+            switch (Belt.Map.getExn(definitions, definition_id)) {
+            | Graph({display})
+            | Code({display})
+            | Interface({display}) =>
+              1
+              + List.length(display.inputOrder)
+              + List.length(display.outputOrder)
+            | _ => raise(Not_found)
             }
           }
         )
@@ -222,7 +235,7 @@ let make =
         {
           x: nodePosition.x + (if (isSink) {80} else {0}),
           y:
-            (getNibIndex(node, nib_id, isSink, definitions) + 1)
+            (getRowIndex(node, nib_id, isSink, definitions) + 1)
             * textHeight
             + textHeight
             / 2

@@ -168,8 +168,31 @@ let pointExample =
     ~nodes=[|
       ("constructor", ShapeConstruct("point")),
       ("destructure", ShapeDestructure("point")),
+      ("x", Value("one")),
+      ("y", Value("one")),
     |],
-    ~connections=[||],
+    ~connections=[|
+      (
+        NodeConnection({node_id: "constructor", nib_id: "x"}),
+        NodeConnection({node_id: "x", nib_id: "value"}),
+      ),
+      (
+        NodeConnection({node_id: "constructor", nib_id: "y"}),
+        NodeConnection({node_id: "y", nib_id: "value"}),
+      ),
+      (
+        NodeConnection({node_id: "destructure", nib_id: "value"}),
+        NodeConnection({node_id: "constructor", nib_id: "value"}),
+      ),
+      (
+        GraphConnection({nib_id: "x"}),
+        NodeConnection({node_id: "destructure", nib_id: "x"}),
+      ),
+      (
+        GraphConnection({nib_id: "y"}),
+        NodeConnection({node_id: "destructure", nib_id: "y"}),
+      ),
+    |],
   );
 
 let definitions =

@@ -75,7 +75,9 @@ let getName = (definition: definition) : string =>
   | Graph({documentation})
   | Code({documentation})
   | Interface({documentation}) => Belt.Map.getExn(documentation, "en").name
-  | Constant({documentation}) => Belt.Map.getExn(documentation, "en").name
+  | Constant({documentation, value}) =>
+    let name = Belt.Map.getExn(documentation, "en").name;
+    name != "" ? name : value;
   | Shape({documentation}) => Belt.Map.getExn(documentation, "en").name
   | _ => raise(Not_found)
   };
@@ -101,10 +103,30 @@ let getOutputs = (definition: definition) =>
   | _ => raise(Not_found)
   };
 
-let getNibIndex =
+let getRowIndex =
     (node: node, nib_id: nib_id, isSink: bool, definitions: definition_map) =>
   switch (node) {
-  | Value(_) => (-1)
+  | Value(_)
+  | Reference(_) => (-1)
+  | Lambda(_) => 0
+  | PointerCall(definition_id) =>
+    switch (Belt.Map.getExn(definitions, definition_id)) {
+    | Graph({display})
+    | Code({display})
+    | Interface({display}) =>
+      if (isSink) {
+        if (nib_id == "implementation") {
+          0;
+        } else {
+          indexOf(nib_id, display.inputOrder) + 1;
+        };
+      } else {
+        1
+        + List.length(display.inputOrder)
+        + indexOf(nib_id, display.outputOrder);
+      }
+    | _ => raise(Not_found)
+    }
   | ShapeConstruct(definition_id) =>
     switch (Belt.Map.getExn(definitions, definition_id)) {
     | Shape({display}) =>
@@ -135,13 +157,16 @@ let getNibIndex =
         indexOf(nib_id, display.outputOrder)
         + List.length(display.inputOrder);
       }
+    | _ => raise(Not_found)
     }
   };
 
 let getOutputIndex = (node: node, nib_id: nib_id, definitions: definition_map) =>
   switch (node) {
   | Value(_)
-  | ShapeConstruct(_) => 0
+  | ShapeConstruct(_)
+  | Reference(_)
+  | Lambda(_) => 0
   | ShapeDestructure(definition_id) =>
     let definition = Belt.Map.getExn(definitions, definition_id);
     switch (definition) {
@@ -153,6 +178,15 @@ let getOutputIndex = (node: node, nib_id: nib_id, definitions: definition_map) =
     switch (definition) {
     | Graph({display})
     | Code({display}) => indexOf(nib_id, display.outputOrder)
+    | _ => raise(Not_found)
+    };
+  | PointerCall(definition_id) =>
+    let definition = Belt.Map.getExn(definitions, definition_id);
+    switch (definition) {
+    | Graph({display})
+    | Code({display})
+    | Interface({display}) => indexOf(nib_id, display.outputOrder)
+    | _ => raise(Not_found)
     };
   };
 
