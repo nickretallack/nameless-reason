@@ -7,8 +7,8 @@ let component = ReasonReact.reducerComponent("App");
 let make = (~size, ~definitions, _children) => {
   ...component,
   initialState: () => {
-    definitions,
-    definition_id: ReasonReact.Router.dangerouslyGetInitialUrl().hash,
+    let initialUrl = ReasonReact.Router.dangerouslyGetInitialUrl().hash;
+    {definitions, definition_id: initialUrl == "" ? "example" : initialUrl};
   },
   didMount: self => {
     let watcherId =
