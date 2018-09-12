@@ -123,10 +123,6 @@ type constant_definition = {
   value: string,
 };
 
-type reference_definition = {
-  documentation: language_map(basic_documentation),
-};
-
 type interface_definition = {
   documentation: language_map(function_documentation),
   display: function_display,
@@ -142,7 +138,6 @@ type definition =
   | Graph(graph_definition)
   | Code(code_definition)
   | Constant(constant_definition)
-  | Reference(reference_definition)
   | Interface(interface_definition)
   | Shape(shape_definition);
 

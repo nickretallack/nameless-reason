@@ -79,7 +79,6 @@ let getName = (definition: definition) : string =>
     let name = Belt.Map.getExn(documentation, "en").name;
     name != "" ? name : value;
   | Shape({documentation}) => Belt.Map.getExn(documentation, "en").name
-  | _ => raise(Not_found)
   };
 
 let getInputs = (definition: definition) =>
