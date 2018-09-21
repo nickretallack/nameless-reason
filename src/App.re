@@ -48,65 +48,15 @@ let make = (~size, ~definitions, _children) => {
       };
     | ChangeName({definition_id, name}) =>
       let definition = Belt.Map.getExn(state.definitions, definition_id);
-      switch (definition) {
-      | Graph(definition) =>
-        let documentation = Belt.Map.getExn(definition.documentation, "en");
-        ReasonReact.Update({
-          ...state,
-          definitions:
-            Belt.Map.set(
-              state.definitions,
-              definition_id,
-              Graph({
-                ...definition,
-                documentation:
-                  Belt.Map.set(
-                    definition.documentation,
-                    "en",
-                    {...documentation, name},
-                  ),
-              }),
-            ),
-        });
-      | Constant(definition) =>
-        let documentation = Belt.Map.getExn(definition.documentation, "en");
-        ReasonReact.Update({
-          ...state,
-          definitions:
-            Belt.Map.set(
-              state.definitions,
-              definition_id,
-              Constant({
-                ...definition,
-                documentation:
-                  Belt.Map.set(
-                    definition.documentation,
-                    "en",
-                    {...documentation, name},
-                  ),
-              }),
-            ),
-        });
-      | Code(definition) =>
-        let documentation = Belt.Map.getExn(definition.documentation, "en");
-        ReasonReact.Update({
-          ...state,
-          definitions:
-            Belt.Map.set(
-              state.definitions,
-              definition_id,
-              Code({
-                ...definition,
-                documentation:
-                  Belt.Map.set(
-                    definition.documentation,
-                    "en",
-                    {...documentation, name},
-                  ),
-              }),
-            ),
-        });
-      };
+      ReasonReact.Update({
+        ...state,
+        definitions:
+          Belt.Map.set(
+            state.definitions,
+            definition_id,
+            setName(definition, name),
+          ),
+      });
     },
   render: self =>
     switch (self.state.definition_id) {

@@ -81,6 +81,60 @@ let getName = (definition: definition) : string =>
   | Shape({documentation}) => Belt.Map.getExn(documentation, "en").name
   };
 
+let setName = (definition: definition, name: string) : definition =>
+  switch (definition) {
+  | Graph(definition) =>
+    Graph({
+      ...definition,
+      documentation:
+        Belt.Map.set(
+          definition.documentation,
+          "en",
+          {...Belt.Map.getExn(definition.documentation, "en"), name},
+        ),
+    })
+  | Constant(definition) =>
+    Constant({
+      ...definition,
+      documentation:
+        Belt.Map.set(
+          definition.documentation,
+          "en",
+          {...Belt.Map.getExn(definition.documentation, "en"), name},
+        ),
+    })
+  | Code(definition) =>
+    Code({
+      ...definition,
+      documentation:
+        Belt.Map.set(
+          definition.documentation,
+          "en",
+          {...Belt.Map.getExn(definition.documentation, "en"), name},
+        ),
+    })
+  | Interface(definition) =>
+    Interface({
+      ...definition,
+      documentation:
+        Belt.Map.set(
+          definition.documentation,
+          "en",
+          {...Belt.Map.getExn(definition.documentation, "en"), name},
+        ),
+    })
+  | Shape(definition) =>
+    Shape({
+      ...definition,
+      documentation:
+        Belt.Map.set(
+          definition.documentation,
+          "en",
+          {...Belt.Map.getExn(definition.documentation, "en"), name},
+        ),
+    })
+  };
+
 let getInputs = (definition: definition) =>
   switch (definition) {
   | Graph({documentation})
