@@ -135,6 +135,70 @@ let setName = (definition: definition, name: string) : definition =>
     })
   };
 
+let setFunctionDocumentationDescription =
+    (
+      description: string,
+      documentation: language_map(function_documentation),
+    ) =>
+  Belt.Map.set(
+    documentation,
+    "en",
+    {...Belt.Map.getExn(documentation, "en"), description},
+  );
+
+let setDescription =
+    (definition: definition, description: string)
+    : definition =>
+  switch (definition) {
+  | Graph(definition) =>
+    Graph({
+      ...definition,
+      documentation:
+        setFunctionDocumentationDescription(
+          description,
+          definition.documentation,
+        ),
+    })
+  | Code(definition) =>
+    Code({
+      ...definition,
+      documentation:
+        setFunctionDocumentationDescription(
+          description,
+          definition.documentation,
+        ),
+    })
+  | Interface(definition) =>
+    Interface({
+      ...definition,
+      documentation:
+        setFunctionDocumentationDescription(
+          description,
+          definition.documentation,
+        ),
+    })
+  | Constant(definition) =>
+    Constant({
+      ...definition,
+      documentation:
+        Belt.Map.set(
+          definition.documentation,
+          "en",
+          {...Belt.Map.getExn(definition.documentation, "en"), description},
+        ),
+    })
+  | Shape(definition) =>
+    Shape({
+      ...definition,
+      documentation:
+        Belt.Map.set(
+          definition.documentation,
+          "en",
+          {...Belt.Map.getExn(definition.documentation, "en"), description},
+        ),
+    })
+  };
+
 let getInputs = (definition: definition) =>
   switch (definition) {
   | Graph({documentation})
