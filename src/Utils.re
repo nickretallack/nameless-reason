@@ -1,5 +1,7 @@
 open Types;
 
+let randomId = () => 
+
 let pixels = x => string_of_int(x) ++ "px";
 
 let positionStyle = position =>
@@ -197,6 +199,42 @@ let setDescription =
           {...Belt.Map.getExn(definition.documentation, "en"), description},
         ),
     })
+  };
+
+let addInput = (definition: definition) : definition => {
+  let id = "new"; /*string_of_int(Random.int);*/
+  switch (definition) {
+  | Graph(definition) =>
+    let documentation = Belt.Map.getExn(definition.documentation, "en");
+    Graph({
+      ...definition,
+      documentation:
+        Belt.Map.set(
+          definition.documentation,
+          "en",
+          {
+            ...documentation,
+            inputNames: Belt.Map.set(documentation.inputNames, id, ""),
+          },
+        ),
+      display: {
+        ...definition.display,
+        inputOrder: List.append(definition.display.inputOrder, [id]),
+      },
+    });
+  };
+};
+
+let setDocumentationName =
+    (documentation: documentation, name: string)
+    : documentation =>
+  switch (documentation) {
+  | BasicDocumentation({description}) =>
+    BasicDocumentation({name, description})
+  | FunctionDocumentation({description, inputNames, outputNames}) =>
+    FunctionDocumentation({name, description, inputNames, outputNames})
+  | ShapeDocumentation({description, fieldNames}) =>
+    ShapeDocumentation({name, description, fieldNames})
   };
 
 let getInputs = (definition: definition) =>

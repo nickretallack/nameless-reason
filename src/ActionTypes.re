@@ -52,9 +52,18 @@ type change_name_action = {
   name: string,
 };
 
+type change_description_action = {
+  definition_id,
+  description: string,
+};
+
+type add_input_action = {definition_id};
+
 type app_action =
   | CreateConnection(create_connection_action)
   | ChangeName(change_name_action)
+  | ChangeDescription(change_description_action)
+  | AddInput(add_input_action)
   | ChangeRoute(ReasonReact.Router.url);
 
 type app_state = {

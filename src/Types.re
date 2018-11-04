@@ -99,6 +99,11 @@ type shape_documentation = {
   fieldNames: nib_map(string),
 };
 
+type documentation =
+  | BasicDocumentation(basic_documentation)
+  | ShapeDocumentation(shape_documentation)
+  | FunctionDocumentation(function_documentation);
+
 type function_display = {
   inputOrder: list(nib_id),
   outputOrder: list(nib_id),

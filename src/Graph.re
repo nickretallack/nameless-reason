@@ -377,6 +377,9 @@ let make =
           documentation.inputNames,
         )
       )
+      <a onClick=(_ => emit(AddInput({definition_id: definition_id})))>
+        (ReasonReact.string("Add Input"))
+      </a>
       (
         renderMap(
           ((nib_id, name)) =>

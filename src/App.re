@@ -57,6 +57,28 @@ let make = (~size, ~definitions, _children) => {
             setName(definition, name),
           ),
       });
+    | ChangeDescription({definition_id, description}) =>
+      let definition = Belt.Map.getExn(state.definitions, definition_id);
+      ReasonReact.Update({
+        ...state,
+        definitions:
+          Belt.Map.set(
+            state.definitions,
+            definition_id,
+            setDescription(definition, description),
+          ),
+      });
+    | AddInput({definition_id}) =>
+      let definition = Belt.Map.getExn(state.definitions, definition_id);
+      ReasonReact.Update({
+        ...state,
+        definitions:
+          Belt.Map.set(
+            state.definitions,
+            definition_id,
+            addInput(definition),
+          ),
+      });
     },
   render: self =>
     switch (self.state.definition_id) {
