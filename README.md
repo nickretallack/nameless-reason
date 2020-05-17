@@ -1,5 +1,7 @@
 # nameless-reason
 
+This repository holds an early version of the ReasonReact rewrite of [Nameless Language](https://github.com/nickretallack/nameless-language).  I switched to the new repository when I [upgraded to the newer way to write ReasonReact apps](https://reasonml.github.io/reason-react/docs/en/reasonreactcompat).
+
 ## Run Project
 
 ```sh
@@ -9,9 +11,7 @@ npm start
 npm run webpack
 ```
 
-After you see the webpack compilation succeed (the `npm run webpack` step), open up `src/index.html` (**no server needed!**). Then modify whichever `.re` file in `src` and refresh the page to see the changes.
-
-**For more elaborate ReasonReact examples**, please see https://github.com/reasonml-community/reason-react-example
+After you see the webpack compilation succeed (the `npm run webpack` step), open up `src/index.html`
 
 ## Build for Production
 
